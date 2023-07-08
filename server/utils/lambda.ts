@@ -1,4 +1,3 @@
-import { curry, defaultTo } from 'ramda'
 import {
     Architecture,
     CreateFunctionCommand,
@@ -10,16 +9,9 @@ import {
     Runtime,
 } from '@aws-sdk/client-lambda'
 
-const orDefaultRegion = defaultTo('us-east-1')
-const createClientRegion = curry(
-    (region: any, ClientConstructor: typeof LambdaClient) =>
-        new ClientConstructor({ region: orDefaultRegion(region) })
-)
-
-const CreateClient = (region?: string) => {
-    const createClientDefaultRegion = createClientRegion(region)
-
-    return createClientDefaultRegion(LambdaClient)
+export type RegionArnArgs = {
+    arn: string
+    region: string
 }
 
 export type CreateFunctionArgs = {
@@ -37,7 +29,7 @@ export const CreateFunction = ({
     memory,
     timeout,
 }: CreateFunctionArgs) => {
-    const client = CreateClient(region)
+    const client = new LambdaClient(region)
 
     const command = new CreateFunctionCommand({
         Code: { ZipFile: code },
@@ -55,13 +47,7 @@ export const CreateFunction = ({
     return client.send(command)
 }
 
-export const CreateFunctionUrl = ({
-    arn,
-    region,
-}: {
-    arn: string
-    region?: string
-}) => {
+export const CreateFunctionUrl = ({ arn, region }: RegionArnArgs) => {
     const command = new CreateFunctionUrlConfigCommand({
         FunctionName: arn,
         AuthType: 'NONE',
@@ -75,16 +61,10 @@ export const CreateFunctionUrl = ({
         InvokeMode: 'BUFFERED',
     })
 
-    return CreateClient(region).send(command)
+    return new LambdaClient(region).send(command)
 }
 
-export const AddPermission = ({
-    arn,
-    region,
-}: {
-    arn: string
-    region?: string
-}) => {
+export const AddPermission = ({ arn, region }: RegionArnArgs) => {
     const command = new AddPermissionCommand({
         FunctionName: arn,
         FunctionUrlAuthType: 'NONE',
@@ -93,16 +73,16 @@ export const AddPermission = ({
         Principal: '*',
     })
 
-    return CreateClient(region).send(command)
+    return new LambdaClient(region).send(command)
 }
 
 export type GetFunctionArgs = {
     name: string
-    region?: string
+    region: string
 }
 
 export const GetFunction = ({ name, region }: GetFunctionArgs) => {
-    const client = CreateClient(region)
+    const client = new LambdaClient(region)
 
     const command = new GetFunctionCommand({
         FunctionName: name,
