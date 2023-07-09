@@ -8,8 +8,7 @@ type App = {
     functions: any
 }
 
-const apps = ref<App[]>([])
-const isPending = ref(true)
+const auth = useSupabaseAuthClient().auth
 const search = ref('')
 const showCreate = ref(false)
 const isCreating = ref(false)
@@ -20,8 +19,13 @@ const form = reactive({
     name: '',
     region: Regions[0].value,
 })
+const { data: apps } = useFetch<App[]>('/api/apps', {
+    method: 'POST',
+})
 
 const appsToShow = computed(() => {
+    if (!apps.value) return []
+
     const value = search.value.trim()
 
     if (value === '') return apps.value
@@ -38,9 +42,6 @@ async function checkNameExists(name: string) {
         body: {
             name,
         },
-        headers: {
-            token: await GetUserToken(),
-        },
     })
 
     const value = !data.value || 'App name already exists'
@@ -54,17 +55,10 @@ async function Submit() {
     if (isCreating.value) return
     isCreating.value = true
 
-    const token = await GetUserToken()
-
-    if (!token) return (isCreating.value = false)
-
     const { error } = await useFetch<string>('/api/apps', {
         method: 'PUT',
         body: {
             ...form,
-        },
-        headers: {
-            token,
         },
     })
 
@@ -79,22 +73,6 @@ async function Submit() {
     useRouter().push(`/dashboard/app-${form.name}`)
 }
 
-onMounted(async () => {
-    const token = await GetUserToken()
-
-    if (!token) return
-
-    const { data } = await useFetch<App[]>('/api/apps', {
-        method: 'POST',
-        headers: {
-            token,
-        },
-    })
-
-    isPending.value = false
-
-    apps.value = data.value || []
-})
 definePageMeta({
     layout: 'dashboard',
 })
@@ -132,11 +110,11 @@ useHead({ title: 'Dashboard : Luacel' })
                 <a-card v-for="app of appsToShow" :key="app.name" size="small">
                     <nuxt-link
                         class="h-20 flex gap-4 overflow-hidden"
-                        :to="`/dashboard/app-${app.name}`"
+                        :to="`/dashboard/app-${app.name}/functions`"
                     >
                         <img
                             class="h-full rounded-md"
-                            :src="app.img"
+                            :src="`https://api.dicebear.com/6.x/shapes/svg?seed=${app.name}`"
                             alt="App icon"
                         />
 
@@ -162,24 +140,6 @@ useHead({ title: 'Dashboard : Luacel' })
                             </div>
                         </div>
                     </nuxt-link>
-                </a-card>
-
-                <a-card
-                    v-for="index of isPending ? 8 : 0"
-                    :key="index"
-                    size="small"
-                    class="animate-pulse"
-                    :style="`animate-delay: pusle ${(index - 1) * 100}ms`"
-                >
-                    <div class="flex gap-4">
-                        <div class="h-12 w-12 bg-white/25 rounded-md"></div>
-
-                        <div class="flex flex-col gap-2 justify-center">
-                            <div class="h-4 w-40 bg-white/25 rounded-md"></div>
-
-                            <div class="h-4 w-60 bg-white/25 rounded-md"></div>
-                        </div>
-                    </div>
                 </a-card>
             </div>
         </div>

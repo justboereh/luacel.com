@@ -1,90 +1,36 @@
 <script setup lang="ts">
-import { watchOnce } from '@vueuse/core'
+import { refDebounced } from '@vueuse/core'
 import { App, AppFunction } from '#types/app'
 import { NuxtLink } from '#components'
 
-const App = ref<App>()
-const AppName = ref<string>()
-const Functions = ref<AppFunction[]>([])
-const isFunctionsPending = ref(true)
-const RefreshFunctions = ref<() => Promise<void>>()
 const route = useRoute()
 const router = useRouter()
-const AppTab = ref()
-const Path = ref()
-
-watchOnce(AppName, async (name) => {
-    const token = await GetUserToken()
-    if (!token) return
-
-    const { data: app } = await useFetch<App>(`/api/apps/${name}`, {
+const { data: App } = useFetch<App>(
+    computed(() => `/api/apps/${route.params.name}`),
+    {
         method: 'POST',
-        headers: {
-            token,
-        },
-    })
-
-    if (!app.value) return router.replace('/dashboard')
-
-    useHead({ title: `App - ${app.value.name} : Luacel` })
-
-    App.value = app.value
-
-    const { data, execute, pending } = await useFetch<AppFunction[]>(
-        `/api/functions`,
-        {
-            method: 'POST',
-            headers: {
-                token,
-            },
-            body: {
-                id: app.value.id,
-            },
-        }
-    )
-
-    RefreshFunctions.value = execute
-
-    watch(data, (v) => (Functions.value = v || []), {
-        immediate: true,
-    })
-
-    watch(pending, (v) => (isFunctionsPending.value = v), {
-        immediate: true,
-    })
+    }
+)
+const {
+    data: Functions,
+    execute: FunctionsExecute,
+    pending: isFunctionsPending,
+} = useFetch<AppFunction[]>(`/api/functions`, {
+    method: 'POST',
+    body: {
+        id: computed(() => App.value?.id),
+    },
 })
 
-watch(
-    route,
-    (r) => {
-        AppTab.value = r.path.split('/').slice(3, 4)[0]
-
-        if (!r.params.name) return
-        AppName.value = r.params.name as string
-    },
-    {
-        immediate: true,
-    }
-)
-
-watch(
-    App,
-    (a) => {
-        if (!a) return
-
-        Path.value = route.path.split('/').slice(0, 3).join('/')
-    },
-    {
-        immediate: true,
-    }
-)
+const AppTab = computed(() => route.path.split('/').slice(3, 4)[0])
+const Path = computed(() => route.path.split('/').slice(0, 3).join('/'))
 
 provide('useApp', App)
 provide('useAppTab', AppTab)
 provide('useAppPath', Path)
 provide('useFunctions', Functions)
 provide('useFunctionsPending', isFunctionsPending)
-provide('useRefreshFunctions', RefreshFunctions)
+provide('useRefreshFunctions', FunctionsExecute)
 </script>
 
 <template>

@@ -1,6 +1,8 @@
 import { AddPermission, CreateFunction, CreateFunctionUrl } from '#utils/lambda'
 import { BadRequest } from '#utils/responses'
-import type { AppFunction, App } from '#types/app'
+import type { App } from '#types/app'
+import { db } from '#utils/database'
+import { serverSupabaseUser } from '#supabase/server'
 
 // const res = await CreateFunction({ name, code, region, memory, timeout })
 
@@ -10,61 +12,57 @@ type Body = {
     app: string
 }
 
+const GetAppQuery = 'select * from apps where `author` = ? and `id` = ?'
+const GetFunctionsQuery = 'select * from functions where `app` = ? and `name` = ?'
+// prettier-ignore
+const InsertFunctionQuery = 'insert into functions (`name`, `arn`, `app`, `path`) values (?, ?, ?, ?)'
+
 export default defineEventHandler(async (event) => {
-    const token = getHeader(event, 'token')
-    if (!token) return BadRequest(event)
+    const user = await serverSupabaseUser(event)
+    if (!user) return BadRequest(event)
 
     const body = await readBody<Body>(event)
     if (!body.code) return BadRequest(event, 'Invalid data')
     if (!body.name) return BadRequest(event, 'Invalid data')
     if (!body.app) return BadRequest(event, 'Invalid data')
 
-    try {
-        const { uid } = await auth.verifyIdToken(token, true)
+    const { rows: apps } = await db.execute(GetAppQuery, [user.id, body.app])
+    if (apps.length < 1) return BadRequest(event, 'Invalid App')
 
-        let Apps = await Knex<App>('apps')
-            .select('*')
-            .where('author', uid)
-            .where('id', body.app)
-            .then()
+    const { rows: functions } = await db.execute(GetFunctionsQuery, [
+        body.app,
+        body.name,
+    ])
+    if (functions.length > 0) return BadRequest(event, 'Name exists')
 
-        if (!Apps[0]) return BadRequest(event, 'Invalid App')
+    const app = apps[0] as App
 
-        let Functions = await Knex<AppFunction>('functions')
-            .select('*')
-            .where('app', body.app)
-            .where('name', body.name)
-            .then()
+    console.log(app)
 
-        if (Functions[0]) return BadRequest(event, 'Name exists')
+    const res = await CreateFunction({
+        name: `${app.id}-${body.name}`,
+        code: Uint8Array.from(body.code),
+        region: app.region,
+        memory: app.memory,
+        timeout: app.timeout,
+    })
 
-        const res = await CreateFunction({
-            name: `${Apps[0].id}-${body.name}`,
-            code: Uint8Array.from(body.code),
-            region: Apps[0].region,
-            memory: Apps[0].memory,
-            timeout: Apps[0].timeout,
-        })
+    await AddPermission({
+        arn: res.FunctionArn as string,
+        region: app.region,
+    })
 
-        await AddPermission({
-            arn: res.FunctionArn as string,
-            region: Apps[0].region,
-        })
+    const fnURL = await CreateFunctionUrl({
+        arn: res.FunctionArn as string,
+        region: app.region,
+    })
 
-        const fnURL = await CreateFunctionUrl({
-            arn: res.FunctionArn as string,
-            region: Apps[0].region,
-        })
+    await db.execute(InsertFunctionQuery, [
+        body.name,
+        res.FunctionArn,
+        body.app,
+        fnURL.FunctionUrl,
+    ])
 
-        await Knex<AppFunction>('functions').insert({
-            name: body.name,
-            arn: res.FunctionArn,
-            app: body.app,
-            path: fnURL.FunctionUrl,
-        })
-
-        return 'Ok'
-    } catch (error) {
-        return BadRequest(event)
-    }
+    return 'Ok'
 })

@@ -1,14 +1,9 @@
 <script setup lang="ts">
-import {
-    sendEmailVerification,
-    updateEmail,
-    updatePassword,
-} from '@firebase/auth'
 import { usePrevious } from '@vueuse/core'
-import { updateCurrentUserProfile } from 'vuefire'
 import { Rules } from '../../assets/scripts/user-creds-validate'
 
-const user = useCurrentUser()
+const auth = useSupabaseAuthClient().auth
+const user = useSupabaseUser()
 const showPassword = ref(false)
 const editEmail = ref(false)
 const isValid = reactive({
@@ -24,7 +19,7 @@ const showDialogs = reactive({
     password: false,
 })
 const form = reactive({
-    name: user.value?.displayName || '',
+    name: user.value?.aud || '',
     email: user.value?.email || '',
     password: '',
     confirm: '',
@@ -41,8 +36,6 @@ function SubmitDisplayName() {
     if (!isValid.name) return
 
     showDialogs.displayName = false
-
-    updateCurrentUserProfile({ displayName: form.name })
 }
 
 function SubmitNewEmail() {
@@ -51,23 +44,19 @@ function SubmitNewEmail() {
 
     showDialogs.email = false
 
-    updateEmail(user.value, form.email)
-}
-
-function VerifyEmail() {
-    if (!user.value) return
-
-    sendEmailVerification(user.value)
+    auth.updateUser({
+        email: form.email,
+    })
 }
 
 async function UpdatePassword() {
     if (!user.value) return
-    if (!isValid.password) return
-    if (!isValid.confirm) return
 
     showDialogs.password = false
 
-    updatePassword(user.value, form.password)
+    auth.updateUser({
+        password: form.password,
+    })
 
     form.password = ''
     form.confirm = ''
@@ -80,7 +69,7 @@ function AccountItem({ label }: { label: string }, { slots }: { slots: any }) {
 }
 
 async function SignOut() {
-    await useFirebaseAuth()?.signOut()
+    await auth.signOut()
 
     useRouter().replace('/login?redirect=/account')
 }
@@ -113,59 +102,57 @@ useHead({ title: 'Account : Luacel' })
                 </template>
 
                 <a-form>
-                    <a-form-item label="Name">
+                    <a-form-item label="Name" name="name">
                         <a-input class="w-full" v-model:value="form.name" />
                     </a-form-item>
-
-                    <a-form-item label="Email">
-                        <div class="flex">
-                            <a-input
-                                html-type="email"
-                                v-model:value="form.email"
-                                :bordered="editEmail"
-                                :disabled="!editEmail"
-                            />
-
-                            <a-button
-                                v-if="!editEmail"
-                                type="link"
-                                @click="editEmail = true"
-                            >
-                                Edit
-                            </a-button>
-
-                            <a-button
-                                v-if="
-                                    editEmail &&
-                                    (prevEmail === form.email || !prevEmail)
-                                "
-                                type="text"
-                                danger
-                                @click="editEmail = false"
-                            >
-                                Cancel
-                            </a-button>
-
-                            <a-button
-                                v-if="
-                                    editEmail &&
-                                    prevEmail &&
-                                    prevEmail !== form.email
-                                "
-                                type="text"
-                                @click=""
-                            >
-                                Save
-                            </a-button>
-                        </div>
-                    </a-form-item>
-
-                    <a-form-item label="Name">
-                        <a-input v-model:value="form.name" />
-                    </a-form-item>
                 </a-form>
-            </a-card>
 
+                <a-form-item label="Email">
+                    <div class="flex">
+                        <a-input
+                            html-type="email"
+                            v-model:value="form.email"
+                            :bordered="editEmail"
+                            :disabled="!editEmail"
+                        />
+
+                        <a-button
+                            v-if="!editEmail"
+                            type="link"
+                            @click="editEmail = true"
+                        >
+                            Edit
+                        </a-button>
+
+                        <a-button
+                            v-if="
+                                editEmail &&
+                                (prevEmail === form.email || !prevEmail)
+                            "
+                            type="text"
+                            danger
+                            @click="editEmail = false"
+                        >
+                            Cancel
+                        </a-button>
+
+                        <a-button
+                            v-if="
+                                editEmail &&
+                                prevEmail &&
+                                prevEmail !== form.email
+                            "
+                            type="text"
+                            @click=""
+                        >
+                            Save
+                        </a-button>
+                    </div>
+                </a-form-item>
+            </a-card>
+        </div>
+
+        <div class="max-w-5xl mx-auto py-4">
             <a-button type="text" danger @click="SignOut">Log Out</a-button>
         </div>
     </div>

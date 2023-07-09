@@ -7,7 +7,7 @@ import { App as AppT, AppFunction } from '#types/app'
 type AppRef = globalThis.Ref<AppT | undefined>
 type FunctionsRef = globalThis.Ref<AppFunction[]>
 type FunctionsPendingRef = globalThis.Ref<boolean>
-type RefreshFunctionsRef = globalThis.Ref<() => Promise<void>>
+type RefreshFunctionsRef = () => Promise<void>
 
 const showCreate = ref(false)
 const App = inject<AppRef>('useApp')
@@ -19,9 +19,9 @@ const isRefreshing = ref(false)
 const isCreating = ref(false)
 const prevNameValidValue = ref<string | boolean>(false)
 const prevName = ref('')
-const formError = ref()
 const form = reactive({
     name: '',
+    error: null,
 })
 const functionsColumns = ref<TableColumnsType>([
     {
@@ -50,9 +50,6 @@ async function checkNameExists(name: string) {
         body: {
             name,
         },
-        headers: {
-            token: await GetUserToken(),
-        },
     })
 
     const value = !data.value || 'App name already exists'
@@ -68,10 +65,6 @@ async function Submit() {
 
     isCreating.value = true
 
-    const token = await GetUserToken()
-
-    if (!token) return (isCreating.value = false)
-
     const code = new Zip()
 
     code.file(
@@ -86,15 +79,12 @@ async function Submit() {
             code: await code.generateAsync({ type: 'array' }),
             app: App.value.id,
         },
-        headers: {
-            token,
-        },
     })
 
     isCreating.value = false
 
     if (error.value) {
-        formError.value = error.value.data
+        form.error = error.value.data
 
         return
     }
@@ -106,11 +96,11 @@ async function Submit() {
 
 async function Refresh() {
     if (isRefreshing.value) return
-    if (!RefreshFunctions?.value) return
+    if (!RefreshFunctions) return
 
     isRefreshing.value = true
 
-    await RefreshFunctions.value()
+    await RefreshFunctions()
 
     isRefreshing.value = false
 }
@@ -160,9 +150,25 @@ definePageMeta({
                 </template>
 
                 <template #emptyText>
-                    <div v-if="isFunctionsPending">Data Pending</div>
+                    <div
+                        class="min-h-sm flex flex-col justify-center items-center gap-2"
+                    >
+                        <icon
+                            :name="
+                                isFunctionsPending
+                                    ? 'fluent:circle-line-24-regular'
+                                    : 'fluent:document-error-24-regular'
+                            "
+                            class="text-4xl"
+                            :class="isFunctionsPending ? 'animate-spin' : ''"
+                        />
 
-                    <div v-else></div>
+                        {{
+                            isFunctionsPending
+                                ? 'Data Pending...'
+                                : 'No functions created.'
+                        }}
+                    </div>
                 </template>
             </a-table>
         </div>
@@ -189,7 +195,9 @@ definePageMeta({
                 <a-input v-model:value="form.name" />
             </a-form-item>
 
-            <p v-if="formError" class="text-red-500">Error: {{ formError }}</p>
+            <p v-if="form.error" class="text-red-500">
+                Error: {{ form.error }}
+            </p>
 
             <a-button type="primary" :loading="isCreating" html-type="submit">
                 Submit

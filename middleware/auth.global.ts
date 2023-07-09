@@ -1,9 +1,9 @@
-export default defineNuxtRouteMiddleware(async (to, from) => {
-    const user = await getCurrentUser()
+export default defineNuxtRouteMiddleware(async (to) => {
+    const user = useSupabaseUser()
 
     const authPaths = ['/login', '/register']
 
-    if (authPaths.includes(to.path) && user) {
+    if (authPaths.includes(to.path) && user.value) {
         const redirect = to.query.redirect
 
         if (!redirect) return navigateTo('/dashboard')
@@ -16,7 +16,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     if (!isInDashboard && !isInAccount) return
 
-    if (!authPaths.includes(to.path) && !user) {
+    if (!authPaths.includes(to.path) && !user.value) {
         const redirect = encodeURIComponent(to.path)
 
         return navigateTo('/login?redirect=' + redirect)

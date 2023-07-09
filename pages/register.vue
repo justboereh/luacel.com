@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import {
-    createUserWithEmailAndPassword,
-    sendEmailVerification,
-    updateProfile,
-} from '@firebase/auth'
-import { useFirebaseAuth } from 'vuefire'
-import { Rules, RulesT } from '../assets/scripts/user-creds-validate'
+import type { Rule } from 'ant-design-vue/es/form'
+import { Rules } from '#rules/user'
+const auth = useSupabaseAuthClient().auth
 
 const isFormValid = ref(false)
 const isRegistering = ref(false)
 const isInvalidCred = ref(false)
 const showPassword = ref(false)
-const auth = useFirebaseAuth()
-
+const dialogProps = reactive({
+    show: false,
+    title: '',
+    text: '',
+})
 const form = reactive({
     name: '',
     email: '',
@@ -20,40 +19,46 @@ const form = reactive({
     confirm: '',
 })
 
-const rules: RulesT = {
-    ...Rules,
-    confirm: [
-        (v: string) => !!v || 'Required',
-        (v: string) => v === form.password || 'Does not match',
-    ],
-}
+Rules.confirm = [
+    {
+        required: true,
+        trigger: 'change',
+        async validator(_, value: string) {
+            if (!value) return Promise.reject('Required')
+            if (value !== form.password) return Promise.reject('Does not match')
+
+            return Promise.resolve()
+        },
+    },
+]
 
 async function Submit() {
-    if (!isFormValid.value) return
     if (!auth) return
 
     isRegistering.value = true
 
-    try {
-        const { user } = await createUserWithEmailAndPassword(
-            auth,
-            form.email,
-            form.password
-        )
+    const { error } = await auth.signUp({
+        email: form.email,
+        password: form.password,
+    })
 
-        await sendEmailVerification(user)
+    if (error) {
+        isRegistering.value = false
 
-        await updateProfile(user, {
-            displayName: form.name,
-        })
+        return
+    }
 
-        const dialog = JSON.stringify({
-            title: 'Email Verification',
-            text: 'We sent you an email to verify your account. You will not be able to log in without verifying.',
-        })
+    const dialog = JSON.stringify({
+        title: 'Email Verification',
+        text: 'We sent you an email to verify your account. You will not be able to log in without verifying.',
+    })
 
-        useRouter().push('/login?dialog=' + encodeURIComponent(dialog))
-    } catch (error) {}
+    useRouter().push(
+        '/login?dialog=' +
+            encodeURIComponent(dialog) +
+            '&name=' +
+            encodeURIComponent(form.name)
+    )
 }
 
 definePageMeta({
@@ -65,74 +70,53 @@ definePageMeta({
     <h2>Login</h2>
 
     <div class="text-sm">
-        Have an account?
+        Don't have an account?
 
-        <nuxt-link to="/login">login</nuxt-link>
+        <nuxt-link to="/register">Register</nuxt-link>
     </div>
 
     <br />
-    <br />
 
-    <v-form v-model="isFormValid" class="space-y-2 w-full" @submit.prevent>
-        <v-text-field
-            v-model="form.name"
-            :rules="rules.name"
-            label="Name"
-            variant="outlined"
-            density="compact"
-            required
-        />
+    <a-form layout="vertical" :model="form" :rules="Rules" @finish="Submit">
+        <a-form-item has-feedback label="Name" name="name">
+            <a-input v-model:value="form.name" />
+        </a-form-item>
 
-        <v-text-field
-            v-model="form.email"
-            :rules="rules.email"
-            label="Email"
-            type="email"
-            variant="outlined"
-            density="compact"
-            required
-        />
+        <a-form-item has-feedback label="Email" name="email">
+            <a-input v-model:value="form.email" placeholder="you@example.com" />
+        </a-form-item>
 
-        <v-text-field
-            v-model="form.password"
-            :rules="rules.password"
-            :type="showPassword ? 'text' : 'password'"
-            :append-inner-icon="
-                showPassword ? 'mdi-eye-outline' : 'mdi-eye-off-outline'
-            "
-            label="Password"
-            variant="outlined"
-            density="compact"
-            required
-            @click:append-inner="showPassword = !showPassword"
-        />
+        <a-form-item has-feedback label="Password" name="password">
+            <a-input v-model:value="form.password" type="password" />
+        </a-form-item>
 
-        <v-text-field
-            v-model="form.confirm"
-            :rules="rules.confirm"
-            :type="showPassword ? 'text' : 'password'"
-            label="Confirm password"
-            variant="outlined"
-            density="compact"
-            :append-inner-icon="
-                showPassword ? 'mdi-eye-outline' : 'mdi-eye-off-outline'
-            "
-            required
-            @click:append-inner="showPassword = !showPassword"
-        />
+        <a-form-item has-feedback label="Confirm password" name="confirm">
+            <a-input v-model:value="form.confirm" type="password" />
+        </a-form-item>
 
         <br />
 
         <a-button
-            variant="flat"
-            color="blue"
-            class="px-4"
+            type="primary"
             block
             :loading="isRegistering"
-            :disabled="!isFormValid || isRegistering"
-            @click="Submit"
+            html-type="submit"
         >
-            Sign up
+            Register
         </a-button>
-    </v-form>
+    </a-form>
+
+    <a-modal
+        v-model:visible="dialogProps.show"
+        :title="dialogProps.title"
+        :closable="false"
+        :footer="false"
+        :centered="true"
+    >
+        <p>{{ dialogProps.text }}</p>
+
+        <br />
+
+        <a-button @click="dialogProps.show = false"> Okay</a-button>
+    </a-modal>
 </template>

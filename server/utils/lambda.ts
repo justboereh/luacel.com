@@ -18,7 +18,7 @@ export type CreateFunctionArgs = {
     name: string
     memory: number
     timeout: number
-    region?: string
+    region: string
     code: Uint8Array
 }
 
@@ -29,7 +29,9 @@ export const CreateFunction = ({
     memory,
     timeout,
 }: CreateFunctionArgs) => {
-    const client = new LambdaClient(region)
+    const client = new LambdaClient({
+        region: region,
+    })
 
     const command = new CreateFunctionCommand({
         Code: { ZipFile: code },
@@ -48,6 +50,9 @@ export const CreateFunction = ({
 }
 
 export const CreateFunctionUrl = ({ arn, region }: RegionArnArgs) => {
+    const client = new LambdaClient({
+        region: region,
+    })
     const command = new CreateFunctionUrlConfigCommand({
         FunctionName: arn,
         AuthType: 'NONE',
@@ -61,10 +66,14 @@ export const CreateFunctionUrl = ({ arn, region }: RegionArnArgs) => {
         InvokeMode: 'BUFFERED',
     })
 
-    return new LambdaClient(region).send(command)
+    return client.send(command)
 }
 
 export const AddPermission = ({ arn, region }: RegionArnArgs) => {
+    const client = new LambdaClient({
+        region: region,
+    })
+
     const command = new AddPermissionCommand({
         FunctionName: arn,
         FunctionUrlAuthType: 'NONE',
@@ -73,7 +82,7 @@ export const AddPermission = ({ arn, region }: RegionArnArgs) => {
         Principal: '*',
     })
 
-    return new LambdaClient(region).send(command)
+    return client.send(command)
 }
 
 export type GetFunctionArgs = {
@@ -82,7 +91,9 @@ export type GetFunctionArgs = {
 }
 
 export const GetFunction = ({ name, region }: GetFunctionArgs) => {
-    const client = new LambdaClient(region)
+    const client = new LambdaClient({
+        region: region,
+    })
 
     const command = new GetFunctionCommand({
         FunctionName: name,

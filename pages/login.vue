@@ -1,14 +1,11 @@
 <script setup lang="ts">
-import { signInWithEmailAndPassword, signOut } from '@firebase/auth'
-import { useFirebaseAuth } from 'vuefire'
-import { Rules } from '../assets/scripts/user-creds-validate'
+import { Rules } from '#rules/app'
 
+const auth = useSupabaseAuthClient().auth
 const route = useRoute()
 const router = useRouter()
-const isFormValid = ref(false)
 const isLoggingIn = ref(false)
 const showPassword = ref(false)
-const auth = useFirebaseAuth()
 const dialogProps = reactive({
     show: false,
     title: '',
@@ -19,24 +16,31 @@ const form = reactive({
     password: '',
 })
 
-const rules = Rules
-
 async function Submit() {
     if (!auth) return
-    if (!isFormValid) return
     if (isLoggingIn.value) return
 
     isLoggingIn.value = true
 
-    try {
-        await signInWithEmailAndPassword(auth, form.email, form.password)
+    const { data, error } = await auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+    })
 
-        if (!route.query.redirect) return router.push('/dashboard')
+    if (error) {
+        isLoggingIn.value = false
 
-        router.replace(decodeURIComponent(route.query.redirect as string))
-    } catch (error) {
-        console.table(error)
+        return
     }
+
+    if (!data.user) {
+        isLoggingIn.value = false
+        return
+    }
+
+    if (!route.query.redirect) return router.push('/dashboard')
+
+    router.replace(decodeURIComponent(route.query.redirect as string))
 }
 
 onBeforeMount(() => {
@@ -67,7 +71,7 @@ definePageMeta({
 
     <br />
 
-    <a-form layout="vertical" :model="form" :rules="Rules" @submit.prevent>
+    <a-form layout="vertical" :model="form" :rules="Rules" @finish="Submit">
         <a-form-item label="Email" name="email">
             <a-input v-model:value="form.email" placeholder="you@example.com" />
         </a-form-item>
@@ -78,7 +82,12 @@ definePageMeta({
 
         <br />
 
-        <a-button type="primary" block :loading="isLoggingIn" @click="Submit">
+        <a-button
+            type="primary"
+            block
+            :loading="isLoggingIn"
+            html-type="submit"
+        >
             Log in
         </a-button>
     </a-form>
