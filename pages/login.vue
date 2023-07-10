@@ -72,11 +72,11 @@ definePageMeta({
     <br />
 
     <a-form layout="vertical" :model="form" :rules="Rules" @finish="Submit">
-        <a-form-item label="Email" name="email">
+        <a-form-item has-feedback label="Email" name="email">
             <a-input v-model:value="form.email" placeholder="you@example.com" />
         </a-form-item>
 
-        <a-form-item label="Password" name="password">
+        <a-form-item has-feedback label="Password" name="password">
             <a-input v-model:value="form.password" type="password" />
         </a-form-item>
 
@@ -98,12 +98,11 @@ definePageMeta({
         :closable="false"
         :footer="false"
         :centered="true"
-        cancelText="Alright"
     >
         <p>{{ dialogProps.text }}</p>
 
         <br />
 
-        <a-button @click="dialogProps.show = false"> Okay</a-button>
+        <a-button @click="dialogProps.show = false"> Okay </a-button>
     </a-modal>
 </template>

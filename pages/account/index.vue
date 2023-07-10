@@ -1,72 +1,15 @@
 <script setup lang="ts">
 import { usePrevious } from '@vueuse/core'
-import { Rules } from '../../assets/scripts/user-creds-validate'
+import { Rules } from '#rules/user'
 
 const auth = useSupabaseAuthClient().auth
 const user = useSupabaseUser()
-const showPassword = ref(false)
-const editEmail = ref(false)
-const isValid = reactive({
-    name: false,
-    email: false,
-    password: false,
-    confirm: false,
-})
 
-const showDialogs = reactive({
-    displayName: false,
-    email: false,
-    password: false,
-})
 const form = reactive({
-    name: user.value?.aud || '',
+    name: user.value?.user_metadata.name || '',
     email: user.value?.email || '',
-    password: '',
-    confirm: '',
+    ccnumber: user.value?.user_metadata.ccn || '',
 })
-const prevEmail = usePrevious(toRef(form, 'email'))
-
-const rules = {
-    ...Rules,
-    confirm: [(v: string) => v === form.password || 'Does not match'],
-}
-
-function SubmitDisplayName() {
-    if (!user.value) return
-    if (!isValid.name) return
-
-    showDialogs.displayName = false
-}
-
-function SubmitNewEmail() {
-    if (!user.value) return
-    if (!isValid.email) return
-
-    showDialogs.email = false
-
-    auth.updateUser({
-        email: form.email,
-    })
-}
-
-async function UpdatePassword() {
-    if (!user.value) return
-
-    showDialogs.password = false
-
-    auth.updateUser({
-        password: form.password,
-    })
-
-    form.password = ''
-    form.confirm = ''
-}
-
-function AccountItem({ label }: { label: string }, { slots }: { slots: any }) {
-    const td = h('td', { class: 'flex-grow' }, slots)
-
-    return h('tr', { class: '' }, [h('td', { class: 'pr-4' }, label), td])
-}
 
 async function SignOut() {
     await auth.signOut()
@@ -74,16 +17,22 @@ async function SignOut() {
     useRouter().replace('/login?redirect=/account')
 }
 
-watch(toRef(showDialogs, 'email'), () => {
-    if (!user.value) return (form.email = '')
+async function NewName() {
+    const validator = Rules.name[0].validator
 
-    form.email = user.value?.email || ''
-})
+    if (!validator) return
 
-watch(toRef(showDialogs, 'password'), () => {
-    form.password = ''
-    form.confirm = ''
-})
+    try {
+        await validator({}, form.name.trim(), () => {})
+
+        auth.updateUser({
+            data: {
+                ...user.value?.user_metadata,
+                name: form.name.trim(),
+            },
+        })
+    } catch (error) {}
+}
 
 definePageMeta({
     layout: 'dashboard',
@@ -97,58 +46,64 @@ useHead({ title: 'Account : Luacel' })
     <div class="p-4">
         <div class="max-w-5xl mx-auto grid lg:grid-cols-2 gap-4">
             <a-card title="Account" size="small">
-                <template #extra>
-                    <a-button type="primary" :disabled="true">Save</a-button>
-                </template>
-
-                <a-form>
-                    <a-form-item label="Name" name="name">
-                        <a-input class="w-full" v-model:value="form.name" />
+                <a-form layout="vertical">
+                    <a-form-item label="Name">
+                        <a-input
+                            class="w-full"
+                            v-model:value="form.name"
+                            @change="NewName"
+                        />
                     </a-form-item>
-                </a-form>
 
-                <a-form-item label="Email">
-                    <div class="flex">
+                    <a-form-item label="Email">
                         <a-input
                             html-type="email"
                             v-model:value="form.email"
-                            :bordered="editEmail"
-                            :disabled="!editEmail"
+                            :disabled="true"
                         />
+                    </a-form-item>
 
-                        <a-button
-                            v-if="!editEmail"
-                            type="link"
-                            @click="editEmail = true"
-                        >
-                            Edit
-                        </a-button>
+                    <a-form-item label="Password">
+                        <a-input html-type="password" :disabled="true" />
+                    </a-form-item>
+                </a-form>
+            </a-card>
 
-                        <a-button
-                            v-if="
-                                editEmail &&
-                                (prevEmail === form.email || !prevEmail)
-                            "
-                            type="text"
-                            danger
-                            @click="editEmail = false"
-                        >
-                            Cancel
-                        </a-button>
+            <a-card title="Billing" size="small">
+                <a-form layout="vertical">
+                    <a-form-item label="Number">
+                        <a-input
+                            class="w-full"
+                            v-model:value="form.ccnumber"
+                            @change="NewName"
+                        />
+                    </a-form-item>
 
-                        <a-button
-                            v-if="
-                                editEmail &&
-                                prevEmail &&
-                                prevEmail !== form.email
-                            "
-                            type="text"
-                            @click=""
-                        >
-                            Save
-                        </a-button>
-                    </div>
-                </a-form-item>
+                    <a-row flex="auto" :gutter="[16]">
+                        <a-col flex="auto">
+                            <a-form-item label="Expiration Date">
+                                <a-input
+                                    html-type="email"
+                                    :value="form.ccnumber ? '**/**' : ''"
+                                    :disabled="true"
+                                />
+                            </a-form-item>
+                        </a-col>
+
+                        <a-col flex="auto">
+                            <a-form-item label="CCV">
+                                <a-input
+                                    html-type="number"
+                                    :value="form.ccnumber ? '***' : ''"
+                                    :disabled="true"
+                                />
+                            </a-form-item>
+                        </a-col>
+                    </a-row>
+
+
+                    <a-button type="primary" :disabled="true">Save</a-button>
+                </a-form>
             </a-card>
         </div>
 

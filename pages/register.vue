@@ -1,11 +1,7 @@
 <script setup lang="ts">
-import type { Rule } from 'ant-design-vue/es/form'
 import { Rules } from '#rules/user'
-const auth = useSupabaseAuthClient().auth
 
-const isFormValid = ref(false)
 const isRegistering = ref(false)
-const isInvalidCred = ref(false)
 const showPassword = ref(false)
 const dialogProps = reactive({
     show: false,
@@ -33,16 +29,23 @@ Rules.confirm = [
 ]
 
 async function Submit() {
-    if (!auth) return
-
     isRegistering.value = true
 
-    const { error } = await auth.signUp({
-        email: form.email,
-        password: form.password,
+    const { error } = await useFetch('/api/account/register', {
+        method: 'POST',
+        body: {
+            email: form.email,
+            password: form.password,
+            name: form.name,
+        },
     })
 
-    if (error) {
+    if (error.value) {
+        dialogProps.title = 'Register Error!'
+        // prettier-ignore
+        dialogProps.text = 'Seems like something went wrong. Double check and try again.'
+        dialogProps.show = true
+
         isRegistering.value = false
 
         return
@@ -53,12 +56,7 @@ async function Submit() {
         text: 'We sent you an email to verify your account. You will not be able to log in without verifying.',
     })
 
-    useRouter().push(
-        '/login?dialog=' +
-            encodeURIComponent(dialog) +
-            '&name=' +
-            encodeURIComponent(form.name)
-    )
+    useRouter().push('/login')
 }
 
 definePageMeta({
@@ -70,9 +68,9 @@ definePageMeta({
     <h2>Login</h2>
 
     <div class="text-sm">
-        Don't have an account?
+        Already have an account?
 
-        <nuxt-link to="/register">Register</nuxt-link>
+        <nuxt-link to="/login">Login</nuxt-link>
     </div>
 
     <br />
