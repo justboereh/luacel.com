@@ -15,10 +15,5 @@ export default defineNuxtConfig({
             htmlAttrs: { class: 'dark' },
         },
     },
-    modules: [
-        '@unocss/nuxt',
-        '@nuxtjs/supabase',
-        'nuxt-icon',
-        'nuxt-monaco-editor',
-    ],
+    modules: ['@unocss/nuxt', '@nuxtjs/supabase', 'nuxt-icon'],
 })

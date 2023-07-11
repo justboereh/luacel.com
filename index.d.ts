@@ -11,3 +11,6 @@ declare global {
 }
 
 export {}
+
+export const ace: any
+export const editor: any

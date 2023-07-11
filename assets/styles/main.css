@@ -7,7 +7,7 @@ body {
     overflow-x: hidden;
 }
 
-@media screen (min-width: 640px) {
+@media (min-width: 640px) {
     ::-webkit-scrollbar {
         background: hsl(0, 0%, 10%);
         width: 0.75rem;

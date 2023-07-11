@@ -1,28 +1,26 @@
 <script setup lang="ts">
-import hljs from 'highlight.js/lib/core'
-import lua from 'highlight.js/lib/languages/lua'
+import { VAceEditor } from 'vue3-ace-editor'
+import 'ace-builds/src-noconflict/mode-lua'
+import 'ace-builds/src-noconflict/theme-twilight'
 
-hljs.registerLanguage('lua', lua)
+// prettier-ignore
+const SimpleDXCode = ref('-- function.lua\n\nreturn function(req, res)\n\tlocal name = req.header("x-name")\n\n\tif not name then\n\t\tres.status(401)\n\n\t\treturn res.send("who are you?")\n\tend\n\n\tif name ~= "mom" then\n\t\treturn res.send("you\'re not my mom")\n\tend\n\n\tres.send("hi mom")\nend')
+const KVCode = ref(`--function.lua
 
-const LuaCode = ref('')
-const FullLuaCode =
-    '-- function.lua\n\nreturn function(req, res)\n   local name = req.header("x-name")\n\n   if not name then\n      res.status(401)\n      return res.send("who are you?")\n   end\n\n   if name ~= "mom" then\n      return res.send("you\'re not my mom")\n   end\n\n   res.send("hi mom")\nend'
+return function(req, res, KV)
+    local name = req.header("x-name")
 
-const highlighted = computed(() => {
-    return hljs.highlight(LuaCode.value, {
-        language: 'lua',
-    }).value
-})
+    if not name or name ~= "mom" then
+        res.status(401)
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+        return res.send("you not my mom")
+    end
 
-onMounted(async () => {
-    for (const char of FullLuaCode) {
-        LuaCode.value += char
+    local data = KV.get(name)
 
-        await sleep(25)
-    }
-})
+    res.send("Your birthday is on " .. data.birthday)
+end
+`)
 </script>
 
 <template>
@@ -33,7 +31,7 @@ onMounted(async () => {
         >
             <div>
                 <h1
-                    class="flex <md:flex-col text-7xl justify-center gap-4 text-white"
+                    class="flex <md:flex-col text-7xl lg:text-9xl justify-center text-center gap-4 text-white"
                 >
                     <div>Deploy</div>
                     <div>Lua</div>
@@ -117,14 +115,73 @@ onMounted(async () => {
             </div>
         </div>
 
-        <div class="max-w-5xl mx-auto">
+        <br />
+        <br />
+
+        <div class="max-w-5xl mx-auto flex <lg:flex-col gap-8">
+            <div class="flex-grow">
+                <h2>Simple DX</h2>
+
+                <p>
+                    I don't know, just look at the code. What else can I say
+                    about that?
+                </p>
+
+                <p>
+                    <nuxt-link to="/docs/kv"> Learn more </nuxt-link>
+                    about how you can easily get started building and deploying
+                    lua.
+                </p>
+            </div>
+
             <div
-                class="max-w-full rounded p-4 bg-dark-900 shadow shadow-black/50"
-                style="height: calc(384px + 1rem)"
+                class="min-w-lg rounded pt-px bg-dark-900 shadow shadow-black/50 overflow-hidden"
             >
-                <pre
-                    class="md:overflow-hidden w-sm"
-                ><code v-html="highlighted" class="language-lua"></code></pre>
+                <VAceEditor
+                    :value="SimpleDXCode"
+                    :options="{
+                        fontSize: 16,
+                    }"
+                    theme="twilight"
+                    lang="lua"
+                    class="min-h-sm min-w-sm"
+                />
+            </div>
+        </div>
+
+        <br />
+        <br />
+
+        <div class="max-w-5xl mx-auto flex <lg:flex-col-reverse gap-8">
+            <div
+                class="min-w-lg rounded pt-px bg-dark-900 shadow shadow-black/50 overflow-hidden"
+            >
+                <VAceEditor
+                    :value="KVCode"
+                    :options="{
+                        fontSize: 16,
+                    }"
+                    theme="twilight"
+                    lang="lua"
+                    class="min-h-sm min-w-sm"
+                />
+            </div>
+
+            <div class="flex-grow">
+                <h2>Easily Connect to KV</h2>
+
+                <p>
+                    Connect to KV database with simple methods. No configs,
+                    enviroment variables, etc needed. Plug and play kind of
+                    thing.
+                </p>
+
+                <p>
+                    Learn more aobut KV database
+                    <nuxt-link to="/docs/kv">
+                        here in the documentations.
+                    </nuxt-link>
+                </p>
             </div>
         </div>
     </div>

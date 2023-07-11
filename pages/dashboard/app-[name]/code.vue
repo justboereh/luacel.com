@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import { VAceEditor } from 'vue3-ace-editor'
 import { useRefHistory } from '@vueuse/core'
 import JSZip from 'jszip'
 import { App as AppT } from '#types/app'
 import { watchDebounced } from '@vueuse/core'
+
+import 'ace-builds/src-noconflict/mode-lua'
+import 'ace-builds/src-noconflict/theme-twilight'
 
 type AppRef = globalThis.Ref<AppT | undefined>
 type FunctionsRef = globalThis.Ref<{ name: string }[]>
@@ -15,7 +19,7 @@ const fnName = ref<string | null>(null)
 const cwFile = ref<string | null>(null)
 const zip = ref<typeof JSZip>()
 const oldcode = ref<string | null>(null)
-const code = ref<string | null>(null)
+const code = ref<string>('')
 const codeHistory = useRefHistory(code)
 const dirs = computed(() => {
     if (!zip.value) return []
@@ -28,8 +32,8 @@ const testcode = ref('-- function.lua\n\nreturn function(req, res)\n   local nam
 watchDebounced(
     [selectedKeys, zip],
     async ([skeys, z], [oldsKeys]) => {
-        if (!z) return (code.value = null)
-        if (!skeys) return (code.value = null)
+        if (!z) return (code.value = '')
+        if (!skeys) return (code.value = '')
         if (oldsKeys && skeys[0] === oldsKeys[0]) return
 
         const file = z.files[skeys[0]]
@@ -97,14 +101,15 @@ definePageMeta({
                 </div>
 
                 <div class="flex-grow">
-                    <MonacoEditor
-                        v-model="code"
-                        class="min-h-sm w-full"
-                        lang="lua"
+                    <VAceEditor
+                        v-model:value="code"
                         :options="{
-                            theme: 'vs-dark',
+                            fontSize: 16,
                         }"
-                    ></MonacoEditor>
+                        theme="twilight"
+                        lang="lua"
+                        class="min-h-sm min-w-sm"
+                    />
                 </div>
             </div>
         </div>

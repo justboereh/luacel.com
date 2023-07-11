@@ -11,24 +11,21 @@
     "devDependencies": {
         "@nuxtjs/supabase": "^0.3.8",
         "@types/node": "^18.16.19",
-        "@types/ramda": "^0.29.3",
         "@types/uuid": "^9.0.2",
         "@unocss/nuxt": "^0.53.1",
-        "monaco-editor": "^0.40.0",
         "nuxt": "^3.6.2",
-        "nuxt-icon": "^0.4.2",
-        "nuxt-monaco-editor": "^1.2.2"
+        "nuxt-icon": "^0.4.2"
     },
     "dependencies": {
         "@aws-sdk/client-lambda": "^3.363.0",
         "@planetscale/database": "^1.8.0",
         "@vueuse/core": "^10.1.2",
+        "ace-builds": "^1.23.3",
         "ant-design-vue": "^3.2.20",
         "aws-crt": "^1.15.20",
-        "highlight.js": "^11.8.0",
         "jszip": "^3.10.1",
-        "nanoid": "^4.0.2",
         "rword": "^3.2.1",
-        "uuid": "^9.0.0"
+        "uuid": "^9.0.0",
+        "vue3-ace-editor": "^2.2.2"
     }
 }
