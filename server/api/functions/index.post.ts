@@ -1,7 +1,6 @@
 import type { AppFunction, App } from '#types/app'
 import { db } from '#utils/database'
 import { BadRequest } from '#utils/responses'
-import { GetFunction } from '#utils/lambda'
 import { serverSupabaseUser } from '#supabase/server'
 
 type Rows = Array<{
@@ -9,8 +8,6 @@ type Rows = Array<{
     domain_custom: string
     domain_set: string
     domain_generated: string
-    arn: string
-    region: string
 }>
 
 // prettier-ignore
@@ -31,16 +28,8 @@ export default defineEventHandler(async (event) => {
     ])
 
     return (rows as Rows).map(
-        ({
-            name,
-            domain_custom,
-            domain_set,
-            domain_generated,
-            arn,
-            region,
-        }) => {
+        ({ name, domain_custom, domain_set, domain_generated }) => {
             const domain = domain_custom ? domain_set : domain_generated
-            GetFunction({ region, name: arn }).then(console.log)
 
             return {
                 name,

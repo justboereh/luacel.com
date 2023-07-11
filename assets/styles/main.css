@@ -7,14 +7,16 @@ body {
     overflow-x: hidden;
 }
 
-::-webkit-scrollbar {
-    background: hsl(0, 0%, 10%);
-    width: 0.75rem;
-}
+@media screen (min-width: 640px) {
+    ::-webkit-scrollbar {
+        background: hsl(0, 0%, 10%);
+        width: 0.75rem;
+    }
 
-::-webkit-scrollbar-thumb {
-    background: hsl(0, 0%, 15%);
-    border-radius: 1rem;
+    ::-webkit-scrollbar-thumb {
+        background: hsl(0, 0%, 15%);
+        border-radius: 1rem;
+    }
 }
 
 .hljs {

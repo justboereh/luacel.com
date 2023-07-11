@@ -4,48 +4,47 @@ import { BadRequest } from '#utils/responses'
 import { GetFunction } from '#utils/lambda'
 import { serverSupabaseUser } from '#supabase/server'
 
-type Rows = Array<{
-    name: string
-    domain_custom: string
-    domain_set: string
-    domain_generated: string
+import JSZip from 'jszip'
+
+type Row = {
     arn: string
     region: string
-}>
-
+}
 // prettier-ignore
-const GetFunctionQuery = 'select functions.name, apps.domain_set, apps.domain_generated, apps.domain_custom, functions.arn, apps.region from apps, functions where apps.id = ? and apps.author = ? and functions.app = ?'
+const GetFunctionQuery = 'select functions.arn, apps.region from apps, functions where apps.id = ? and apps.author = ? and functions.name = ?'
 
 export default defineEventHandler(async (event) => {
     const user = await serverSupabaseUser(event)
     if (!user) return BadRequest(event)
 
-    const body = await readBody<{ id: string }>(event)
+    const body = await readBody<{ id: string; name: string }>(event)
+    const fnname = getRouterParam(event, 'fnname')
 
+    if (!fnname) return BadRequest(event)
     if (!body.id) return BadRequest(event)
 
     const { rows } = await db.execute(GetFunctionQuery, [
         body.id,
         user.id,
-        body.id,
+        fnname,
     ])
 
-    return (rows as Rows).map(
-        ({
-            name,
-            domain_custom,
-            domain_set,
-            domain_generated,
-            arn,
-            region,
-        }) => {
-            const domain = domain_custom ? domain_set : domain_generated
-            GetFunction({ region, name: arn }).then(console.log)
+    if (rows.length < 1) return BadRequest(event)
 
-            return {
-                name,
-                path: `https://${domain}.luacel.app/${name}`,
-            }
-        }
-    )
+    const { region, arn: name } = rows[0] as Row
+
+    const fn_data = await GetFunction({
+        region,
+        name,
+    })
+
+    const res = await $fetch<Blob>(fn_data.Code?.Location as string)
+    const arr = new Uint8Array(await res.arrayBuffer())
+    const data = []
+
+    for (let index = 0; index < arr.length; index++) {
+        data.push(arr.at(index))
+    }
+
+    return data
 })

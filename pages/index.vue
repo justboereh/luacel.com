@@ -9,7 +9,9 @@ const FullLuaCode =
     '-- function.lua\n\nreturn function(req, res)\n   local name = req.header("x-name")\n\n   if not name then\n      res.status(401)\n      return res.send("who are you?")\n   end\n\n   if name ~= "mom" then\n      return res.send("you\'re not my mom")\n   end\n\n   res.send("hi mom")\nend'
 
 const highlighted = computed(() => {
-    return hljs.highlightAuto(LuaCode.value).value
+    return hljs.highlight(LuaCode.value, {
+        language: 'lua',
+    }).value
 })
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
