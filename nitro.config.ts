@@ -1,5 +1,5 @@
-import { defineNitroConfig } from "nitropack/config";
+import { defineNitroConfig } from 'nitropack/config'
 
 export default defineNitroConfig({
-  preset: 'cloudflare-pages'
+    // preset: 'cloudflare-pages'
 })
