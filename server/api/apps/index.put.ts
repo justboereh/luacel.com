@@ -1,5 +1,5 @@
 import { rword } from 'rword'
-import { nanoid } from 'nanoid'
+import { v4 } from 'uuid'
 
 import { db } from '#utils/database'
 import { App } from '#types/app'
@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
         domain_set: '',
         region: body.region,
         author: user.id,
-        id: nanoid(),
+        id: v4(),
     }
 
     while (true) {

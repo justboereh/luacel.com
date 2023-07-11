@@ -13,9 +13,12 @@ type Body = {
 }
 
 const GetAppQuery = 'select * from apps where `author` = ? and `id` = ?'
-const GetFunctionsQuery = 'select * from functions where `app` = ? and `name` = ?'
+const GetFunctionsQuery =
+    'select * from functions where `app` = ? and `name` = ?'
 // prettier-ignore
 const InsertFunctionQuery = 'insert into functions (`name`, `arn`, `app`, `path`) values (?, ?, ?, ?)'
+// prettier-ignore
+const InsertEventQuery = 'insert into events (app, text, date) values (?, ?, ?)'
 
 export default defineEventHandler(async (event) => {
     const user = await serverSupabaseUser(event)
@@ -37,10 +40,8 @@ export default defineEventHandler(async (event) => {
 
     const app = apps[0] as App
 
-    console.log(app)
-
     const res = await CreateFunction({
-        name: `${app.id}-${body.name}`,
+        name: `${app.id}--${body.name}`,
         code: Uint8Array.from(body.code),
         region: app.region,
         memory: app.memory,
@@ -62,6 +63,12 @@ export default defineEventHandler(async (event) => {
         res.FunctionArn,
         body.app,
         fnURL.FunctionUrl,
+    ])
+
+    await db.execute(InsertEventQuery, [
+        app.id,
+        `Added function, ${body.name}`,
+        Date.now(),
     ])
 
     return 'Ok'

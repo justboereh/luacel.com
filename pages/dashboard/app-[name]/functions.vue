@@ -35,12 +35,11 @@ const functionsColumns = ref<TableColumnsType>([
         key: 'path',
     },
     {
-        title: 'Action',
+        title: '',
         key: 'action',
-        width: '10%',
+        width: '5%',
     },
 ])
-
 async function checkNameExists(name: string) {
     if (prevName.value === name) return prevNameValidValue.value
     prevName.value = name
@@ -92,6 +91,19 @@ async function Submit() {
     Refresh()
 
     showCreate.value = false
+}
+
+async function DeleteFunction(name: string) {
+    if (!App?.value) return
+
+    await useFetch(`/api/functions/${name}`, {
+        method: 'delete',
+        body: {
+            id: App.value?.id,
+        },
+    })
+
+    Refresh()
 }
 
 async function Refresh() {
@@ -146,6 +158,26 @@ definePageMeta({
                         <nuxt-link :to="record.path" target="_blank">
                             {{ record.path }}
                         </nuxt-link>
+                    </template>
+
+                    <template v-if="column.key === 'action'">
+                        <a-dropdown :trigger="['click']">
+                            <icon
+                                name="fluent:more-horizontal-16-regular"
+                                class="text-2xl"
+                            />
+
+                            <template #overlay>
+                                <a-menu>
+                                    <a-menu-item> Rename </a-menu-item>
+                                    <a-menu-item
+                                        @click="DeleteFunction(record.name)"
+                                    >
+                                        Delete
+                                    </a-menu-item>
+                                </a-menu>
+                            </template>
+                        </a-dropdown>
                     </template>
                 </template>
 

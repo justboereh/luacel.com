@@ -9,7 +9,7 @@ import { serverSupabaseUser } from '#supabase/server'
 type Result = {
     img?: string
     name: string
-    event: any
+    event: { text: string }
     functions: any
 }
 
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
         result[i] = {
             name,
             //img,
-            event: events[0] || 'no events yet',
+            event: (events[0] as { text: string }) || { text: 'no events yet' },
             functions: functions.length,
         }
     }

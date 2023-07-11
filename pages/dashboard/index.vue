@@ -3,7 +3,7 @@ import { Rules, Regions } from '#rules/app'
 
 type App = {
     name: string
-    event: string
+    event: { text: string }
     img: string
     functions: any
 }
@@ -125,7 +125,9 @@ useHead({ title: 'Dashboard : Luacel' })
                                 {{ app.name }}
                             </span>
 
-                            <span class="text-white/50">~ {{ app.event }}</span>
+                            <span class="text-white/50"
+                                >~ {{ app.event.text }}</span
+                            >
 
                             <div>
                                 <span class="flex items-center gap-2">

@@ -7,6 +7,7 @@ import {
     LambdaClient,
     PackageType,
     Runtime,
+    DeleteFunctionCommand,
 } from '@aws-sdk/client-lambda'
 
 export type RegionArnArgs = {
@@ -96,6 +97,23 @@ export const GetFunction = ({ name, region }: GetFunctionArgs) => {
     })
 
     const command = new GetFunctionCommand({
+        FunctionName: name,
+    })
+
+    return client.send(command)
+}
+
+export type DeleteFunctionArgs = {
+    name: string
+    region: string
+}
+
+export const DeleteFunction = ({ name, region }: DeleteFunctionArgs) => {
+    const client = new LambdaClient({
+        region: region,
+    })
+
+    const command = new DeleteFunctionCommand({
         FunctionName: name,
     })
 
