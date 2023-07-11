@@ -1,6 +1,4 @@
-import { db } from '#utils/database'
 import type { App, AppFunction } from '#types/app'
-import { BadRequest } from '#utils/responses'
 import { serverSupabaseUser } from '#supabase/server'
 
 // prettier-ignore

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { VAceEditor } from 'vue3-ace-editor'
-import 'ace-builds/src-noconflict/mode-lua'
-import 'ace-builds/src-noconflict/theme-twilight'
+// import { VAceEditor } from 'vue3-ace-editor'
+// import 'ace-builds/src-noconflict/mode-lua'
+// import 'ace-builds/src-noconflict/theme-twilight'
 
 // prettier-ignore
 const SimpleDXCode = ref('-- function.lua\n\nreturn function(req, res)\n\tlocal name = req.header("x-name")\n\n\tif not name then\n\t\tres.status(401)\n\n\t\treturn res.send("who are you?")\n\tend\n\n\tif name ~= "mom" then\n\t\treturn res.send("you\'re not my mom")\n\tend\n\n\tres.send("hi mom")\nend')
@@ -118,7 +118,7 @@ end
         <br />
         <br />
 
-        <div class="max-w-5xl mx-auto flex <lg:flex-col gap-8">
+        <!-- <div class="max-w-5xl mx-auto flex <lg:flex-col gap-8">
             <div class="flex-grow">
                 <h2>Simple DX</h2>
 
@@ -183,6 +183,6 @@ end
                     </nuxt-link>
                 </p>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>

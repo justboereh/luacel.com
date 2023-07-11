@@ -1,7 +1,4 @@
-import { AddPermission, CreateFunction, CreateFunctionUrl } from '#utils/lambda'
-import { BadRequest } from '#utils/responses'
 import type { App } from '#types/app'
-import { db } from '#utils/database'
 import { serverSupabaseUser } from '#supabase/server'
 
 // const res = await CreateFunction({ name, code, region, memory, timeout })

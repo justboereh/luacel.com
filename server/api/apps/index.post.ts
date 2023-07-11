@@ -2,8 +2,6 @@
 //import { shapes } from '@dicebear/collection'
 
 import type { AppEvent, App, AppFunction } from '#types/app'
-import { db } from '#utils/database'
-import { BadRequest } from '#utils/responses'
 import { serverSupabaseUser } from '#supabase/server'
 
 type Result = {

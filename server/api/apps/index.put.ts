@@ -1,9 +1,7 @@
 import { rword } from 'rword'
 import { v4 } from 'uuid'
 
-import { db } from '#utils/database'
 import { App } from '#types/app'
-import { BadRequest, Forbidden } from '#utils/responses'
 import { serverSupabaseUser } from '#supabase/server'
 
 type Body = {

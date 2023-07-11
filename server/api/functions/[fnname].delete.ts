@@ -1,7 +1,4 @@
 import type { AppFunction, App } from '#types/app'
-import { db } from '#utils/database'
-import { BadRequest } from '#utils/responses'
-import { DeleteFunction } from '#utils/lambda'
 import { serverSupabaseUser } from '#supabase/server'
 
 type Row = {
@@ -20,7 +17,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody<{ id: string }>(event)
     const fnname = getRouterParam(event, 'fnname')
 
-    console.log(body, fnname	)
+    console.log(body, fnname)
     if (!fnname) return BadRequest(event)
     if (!body.id) return BadRequest(event)
 

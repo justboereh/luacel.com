@@ -1,5 +1,4 @@
 import { Rules } from '#rules/user'
-import { BadRequest } from '#utils/responses'
 import { serverSupabaseServiceRole } from '#supabase/server'
 
 type Body = {

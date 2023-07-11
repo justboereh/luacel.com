@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { VAceEditor } from 'vue3-ace-editor'
+// import { VAceEditor } from 'vue3-ace-editor'
 import { useRefHistory } from '@vueuse/core'
 import JSZip from 'jszip'
 import { App as AppT } from '#types/app'
 import { watchDebounced } from '@vueuse/core'
 
-import 'ace-builds/src-noconflict/mode-lua'
-import 'ace-builds/src-noconflict/theme-twilight'
+// import 'ace-builds/src-noconflict/mode-lua'
+// import 'ace-builds/src-noconflict/theme-twilight'
 
 type AppRef = globalThis.Ref<AppT | undefined>
 type FunctionsRef = globalThis.Ref<{ name: string }[]>
@@ -101,7 +101,7 @@ definePageMeta({
                 </div>
 
                 <div class="flex-grow">
-                    <VAceEditor
+                    <!-- <VAceEditor
                         v-model:value="code"
                         :options="{
                             fontSize: 16,
@@ -109,7 +109,7 @@ definePageMeta({
                         theme="twilight"
                         lang="lua"
                         class="min-h-sm min-w-sm"
-                    />
+                    /> -->
                 </div>
             </div>
         </div>

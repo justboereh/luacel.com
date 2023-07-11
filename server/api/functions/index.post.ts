@@ -1,6 +1,4 @@
 import type { AppFunction, App } from '#types/app'
-import { db } from '#utils/database'
-import { BadRequest } from '#utils/responses'
 import { serverSupabaseUser } from '#supabase/server'
 
 type Rows = Array<{
