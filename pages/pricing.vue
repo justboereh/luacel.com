@@ -66,10 +66,10 @@ const PricingData = [
 const Plans = [
     {
         title: 'Starter',
-        price: '0.99',
+        price: '0',
         features: [
             '50 functions',
-            '10K requests per day',
+            '1K requests per day',
             '10s wall time per request',
             '500MB of data stored per month',
             '100k database reads per day',
@@ -79,7 +79,7 @@ const Plans = [
     },
     {
         title: 'Pro',
-        price: '19.99',
+        price: '20',
         features: [
             '300 functions',
             '100K requests per day',
@@ -89,12 +89,11 @@ const Plans = [
             '1M database writes per day',
             'Custom subdomain',
             'Custom domain',
-            'Email support',
         ],
     },
     {
         title: 'Team',
-        price: '49.99',
+        price: '50',
         features: [
             '1500 functions',
             '1M requests per day',
@@ -104,13 +103,11 @@ const Plans = [
             '50M database writes per day',
             'Custom subdomain',
             'Custom domain',
-            'Email support',
-            'Chat support',
         ],
     },
     {
         title: 'Business',
-        price: '124.99',
+        price: '125',
         features: [
             '10K functions',
             '100M requests per day',
@@ -120,9 +117,6 @@ const Plans = [
             '100M database writes per day',
             'Custom subdomain',
             'Custom domain',
-            'Email support',
-            'Chat support',
-            'Call support',
         ],
     },
 ]
@@ -142,7 +136,9 @@ useHead({
                     <template #extra>
                         <div class="flex flex-col items-center">
                             <span class="text-xl">${{ plan.price }}</span>
-                            <span class="text-sm text-white/50">/ month</span>
+                            <span class="text-xs text-dark-800/50">
+                                / month
+                            </span>
                         </div>
                     </template>
 

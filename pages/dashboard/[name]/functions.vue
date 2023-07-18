@@ -68,7 +68,7 @@ async function Submit() {
 
     code.file(
         'function.lua',
-        "return function(event)\n\treturn 'hi mom'\nend\n"
+        'return function(req, res, kv)\n\tres.send("hi mom")\nend'
     )
 
     const { error } = await useFetch('/api/functions', {
@@ -157,6 +157,8 @@ definePageMeta({
                     <template v-if="column.key === 'path'">
                         <nuxt-link :to="record.path" target="_blank">
                             {{ record.path }}
+
+                            <icon name="fluent:open-16-regular" />
                         </nuxt-link>
                     </template>
 
@@ -169,6 +171,13 @@ definePageMeta({
 
                             <template #overlay>
                                 <a-menu>
+                                    <a-menu-item>
+                                        <nuxt-link
+                                            :to="`code?fnname=${record.name}`"
+                                        >
+                                            Edit code
+                                        </nuxt-link>
+                                    </a-menu-item>
                                     <a-menu-item> Rename </a-menu-item>
                                     <a-menu-item
                                         @click="DeleteFunction(record.name)"

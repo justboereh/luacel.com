@@ -10,10 +10,10 @@ export default defineNuxtConfig({
             new URL('./assets/scripts/types', import.meta.url)
         ),
     },
-    app: {
-        head: {
-            htmlAttrs: { class: 'dark' },
-        },
-    },
-    modules: ['@unocss/nuxt', '@nuxtjs/supabase', 'nuxt-icon'],
+    modules: [
+        '@unocss/nuxt',
+        '@nuxtjs/supabase',
+        'nuxt-icon',
+        'nuxt-monaco-editor',
+    ],
 })

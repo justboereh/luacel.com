@@ -17,7 +17,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (!isInDashboard && !isInAccount) return
 
     if (!authPaths.includes(to.path) && !user.value) {
-        const redirect = encodeURIComponent(to.path)
+        const redirect = encodeURIComponent(to.fullPath)
 
         return navigateTo('/login?redirect=' + redirect)
     }

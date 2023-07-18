@@ -1,78 +1,90 @@
+<script setup lang="ts">
+const user = useSupabaseUser()
+</script>
+
 <template>
-    <div class="sticky top-0 z-100 bg-[#141414]">
-        <div class="p-4">
-            <div
-                class="max-w-5xl mx-auto h-10 flex justify-between items-center"
-            >
-                <nuxt-link
-                    to="/"
-                    class="text-white hover:text-white/75 h-full flex items-center gap-4"
+    <div class="h-screen w-screen flex flex-col">
+        <div class="sticky top-0 z-100 bg-white">
+            <div class="p-4">
+                <div
+                    class="max-w-5xl mx-auto h-8 flex justify-between items-center relative"
                 >
-                    <svg-logo-icon class="h-full" />
+                    <nuxt-link
+                        to="/"
+                        class="h-full flex items-center gap-2 text-dark-800"
+                    >
+                        <svg-logo-icon class="h-full" />
 
-                    <svg-logo-name class="h-2/3 <sm:hidden" />
-                </nuxt-link>
-
-                <div class="<sm:hidden flex items-center h-full gap-2">
-                    <nuxt-link to="/dashboard" class="text-white p-2">
-                        Dashboard
+                        <svg-logo-name class="h-3/5" />
                     </nuxt-link>
 
-                    <nuxt-link to="/pricing" class="text-white p-2">
-                        Pricing
-                    </nuxt-link>
+                    <div class="<sm:hidden flex items-center h-full gap-2">
+                        <nuxt-link
+                            v-if="user"
+                            to="/dashboard"
+                            class="p-2 text-dark-800"
+                        >
+                            Dashboard
+                        </nuxt-link>
 
-                    <nuxt-link to="/docs" class="text-white p-2">
-                        Documentations
-                    </nuxt-link>
+                        <nuxt-link to="/pricing" class="p-2 text-dark-800">
+                            Pricing
+                        </nuxt-link>
 
-                    <nuxt-link to="/login">
+                        <nuxt-link to="/docs" class="p-2 text-dark-800">
+                            Docs
+                        </nuxt-link>
+                    </div>
+
+                    <nuxt-link v-if="!user" to="/login" class="<sm:hidden">
                         <a-button type="primary"> Login </a-button>
                     </nuxt-link>
-                </div>
 
-                <div class="sm:hidden">
-                    <a-dropdown :trigger="['click']">
-                        <a-button>
-                            <template #icon>
-                                <icon
-                                    name="fluent:line-horizontal-3-20-regular"
-                                />
+                    <div class="sm:hidden">
+                        <a-dropdown :trigger="['click']">
+                            <a-button>
+                                <template #icon>
+                                    <icon
+                                        name="fluent:line-horizontal-3-20-regular"
+                                    />
+                                </template>
+                            </a-button>
+
+                            <template #overlay>
+                                <a-menu class="min-w-40">
+                                    <a-menu-item key="dashboard">
+                                        <nuxt-link to="/dashboard">
+                                            Dashboard
+                                        </nuxt-link>
+                                    </a-menu-item>
+
+                                    <a-menu-item key="pricing">
+                                        <nuxt-link to="/pricing">
+                                            Pricing
+                                        </nuxt-link>
+                                    </a-menu-item>
+
+                                    <a-menu-item key="docs">
+                                        <nuxt-link to="/docs"> Docs </nuxt-link>
+                                    </a-menu-item>
+
+                                    <a-divider style="margin: 0"></a-divider>
+
+                                    <a-menu-item key="login">
+                                        <nuxt-link to="/login">
+                                            Login
+                                        </nuxt-link>
+                                    </a-menu-item>
+                                </a-menu>
                             </template>
-                        </a-button>
-
-                        <template #overlay>
-                            <a-menu class="min-w-40">
-                                <a-menu-item key="dashboard">
-                                    <nuxt-link to="/dashboard">
-                                        Dashboard
-                                    </nuxt-link>
-                                </a-menu-item>
-
-                                <a-menu-item key="pricing">
-                                    <nuxt-link to="/pricing">Pricing</nuxt-link>
-                                </a-menu-item>
-
-                                <a-menu-item key="docs">
-                                    <nuxt-link to="/docs">
-                                        Documentations
-                                    </nuxt-link>
-                                </a-menu-item>
-
-                                <a-divider></a-divider>
-
-                                <a-menu-item key="login">
-                                    <nuxt-link to="/login"> Login </nuxt-link>
-                                </a-menu-item>
-                            </a-menu>
-                        </template>
-                    </a-dropdown>
+                        </a-dropdown>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <a-divider style="margin: 0" />
-    </div>
+        <slot />
 
-    <slot />
+        <Footer />
+    </div>
 </template>

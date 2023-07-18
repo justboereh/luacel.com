@@ -17,7 +17,7 @@ const GetAppsQuery = 'select * from apps where `author` = ? and `name` = ?'
 // prettier-ignore
 const GetAppSameDomain = 'select * from apps where `domain_generated` = ? and `domain_set` = ?'
 // prettier-ignore
-const InsertApp = 'insert into apps (`memory`, `timeout`, `name`, `domain_custom`, `domain_generated`, `domain_set`, `region`, `author`, `id`) values (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+const InsertApp = 'insert into apps (`memory`, `timeout`, `name`, `domain_custom`, `domain_generated`, `domain_set`, `region`, `author`, `id`, `created`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 
 export default defineEventHandler(async (event) => {
     const user = await serverSupabaseUser(event)
@@ -43,6 +43,7 @@ export default defineEventHandler(async (event) => {
         region: body.region,
         author: user.id,
         id: v4(),
+        created: Math.floor(Date.now()),
     }
 
     while (true) {

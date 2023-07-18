@@ -1,16 +1,13 @@
 <script setup lang="ts">
-// import { VAceEditor } from 'vue3-ace-editor'
 import { useRefHistory } from '@vueuse/core'
 import JSZip from 'jszip'
 import { App as AppT } from '#types/app'
 import { watchDebounced } from '@vueuse/core'
 
-// import 'ace-builds/src-noconflict/mode-lua'
-// import 'ace-builds/src-noconflict/theme-twilight'
-
 type AppRef = globalThis.Ref<AppT | undefined>
 type FunctionsRef = globalThis.Ref<{ name: string }[]>
 
+const route = useRoute()
 const App = inject<AppRef>('useApp')
 const Functions = inject<FunctionsRef>('useFunctions')
 const expandedKeys = ref()
@@ -21,6 +18,9 @@ const zip = ref<typeof JSZip>()
 const oldcode = ref<string | null>(null)
 const code = ref<string>('')
 const codeHistory = useRefHistory(code)
+// prettier-ignore
+const mobileRegEx = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i
+const ismobile = ref(false)
 const dirs = computed(() => {
     if (!zip.value) return []
 
@@ -68,6 +68,19 @@ watchDebounced(
     { debounce: 500 }
 )
 
+onMounted(() => {
+    let name = route.query.fnname
+
+    if (!name) return
+    if (Array.isArray(name)) name = name[0]
+
+    fnName.value = name as string
+})
+
+onMounted(() => {
+    ismobile.value = mobileRegEx.test(navigator.userAgent.substring(0, 4))
+})
+
 definePageMeta({
     layout: 'app',
 })
@@ -76,10 +89,16 @@ definePageMeta({
 <template>
     <div class="p-4 sm:px-8">
         <div class="max-w-5xl mx-auto space-y-4">
-            <div v-if="!zip" class="grid place-items-center min-h-sm">
+            <div v-if="ismobile">not supported on mobile</div>
+
+            <div v-else-if="!zip" class="grid place-items-center min-h-sm">
                 <a-form layout="vertical">
                     <a-form-item label="Select function">
-                        <a-select v-model:value="fnName">
+                        <a-select
+                            v-model:value="fnName"
+                            :disabled="!!fnName"
+                            :loading="!!fnName"
+                        >
                             <a-select-option
                                 v-for="fn of Functions || []"
                                 :value="fn.name"
@@ -91,7 +110,7 @@ definePageMeta({
                 </a-form>
             </div>
 
-            <div v-else class="flex">
+            <div v-else="" class="flex">
                 <div class="min-w-60">
                     <a-directory-tree
                         v-model:expandedKeys="expandedKeys"
@@ -101,15 +120,16 @@ definePageMeta({
                 </div>
 
                 <div class="flex-grow">
-                    <!-- <VAceEditor
-                        v-model:value="code"
+                    <MonacoEditor
+                        v-model="code"
+                        class="min-h-sm"
                         :options="{
-                            fontSize: 16,
+                            theme: 'vs',
+                            scrollBeyondLastLine: false,
+                            padding: { bottom: 14, top: 14 },
                         }"
-                        theme="twilight"
                         lang="lua"
-                        class="min-h-sm min-w-sm"
-                    /> -->
+                    />
                 </div>
             </div>
         </div>

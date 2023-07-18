@@ -70,7 +70,7 @@ async function Submit() {
         return
     }
 
-    useRouter().push(`/dashboard/app-${form.name}`)
+    useRouter().push(`/dashboard/${form.name}`)
 }
 
 definePageMeta({
@@ -107,10 +107,15 @@ useHead({ title: 'Dashboard : Luacel' })
             </div>
 
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <a-card v-for="app of appsToShow" :key="app.name" size="small">
+                <a-card
+                    v-for="app of appsToShow"
+                    :key="app.name"
+                    size="small"
+                    hoverable
+                >
                     <nuxt-link
-                        class="h-20 flex gap-4 overflow-hidden"
-                        :to="`/dashboard/app-${app.name}/functions`"
+                        class="h-20 flex gap-4"
+                        :to="`/dashboard/${app.name}/functions`"
                     >
                         <img
                             class="h-full rounded-md"
@@ -121,13 +126,13 @@ useHead({ title: 'Dashboard : Luacel' })
                         <div
                             class="flex flex-col flex grow justify-between whitespace-nowrap"
                         >
-                            <span class="text-white text-lg">
+                            <span class="text-dark-800 text-lg">
                                 {{ app.name }}
                             </span>
 
-                            <span class="text-white/50"
-                                >~ {{ app.event.text }}</span
-                            >
+                            <span class="text-dark-800/50">
+                                ~ {{ app.event.text }}
+                            </span>
 
                             <div>
                                 <span class="flex items-center gap-2">
@@ -135,7 +140,7 @@ useHead({ title: 'Dashboard : Luacel' })
                                         name="fluent:math-formula-16-regular"
                                     />
 
-                                    <span class="text-white/50">
+                                    <span class="text-dark-800/50">
                                         {{ app.functions }} functions
                                     </span>
                                 </span>

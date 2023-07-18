@@ -1,28 +1,35 @@
 <script setup lang="ts"></script>
 
 <template>
-    <div class="min-h-screen">
-        <div class="p-4 sm:px-8 sm:pt-8 flex justify-between items-center">
-            <nuxt-link
-                to="/dashboard"
-                class="h-10 flex gap-3 items-center text-white"
-            >
-                <svg-logo-icon class="h-full" />
+    <div class="min-h-screen flex flex-col">
+        <div class="p-4 sm:px-8 sm:pt-8 bg-white">
+            <div class="max-w-5xl mx-auto flex justify-between items-center">
+                <nuxt-link
+                    to="/dashboard"
+                    class="h-10 flex gap-3 items-center text-dark-800"
+                >
+                    <svg-logo-icon class="h-full" />
 
-                <svg-logo-name class="h-1/2 <sm:hidden" />
-            </nuxt-link>
-
-            <div class="flex gap-4 items-center">
-                <nuxt-link to="/docs">
-                    <a-button> Docs </a-button>
+                    <svg-logo-name class="h-1/2 <sm:hidden" />
                 </nuxt-link>
 
-                <nuxt-link to="/account">
-                    <a-button> Account </a-button>
-                </nuxt-link>
+                <div class="flex gap-4 items-center">
+                    <nuxt-link to="/docs">
+                        <a-button> Docs </a-button>
+                    </nuxt-link>
+
+                    <nuxt-link to="/account">
+                        <a-button type="bordered"> Account </a-button>
+                    </nuxt-link>
+                </div>
             </div>
         </div>
 
-        <slot />
+        <main class="flex-grow">
+            <slot />
+        </main>
+        
+
+        <Footer />
     </div>
 </template>

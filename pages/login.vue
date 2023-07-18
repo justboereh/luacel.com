@@ -1,108 +1,87 @@
 <script setup lang="ts">
-import { Rules } from '#rules/app'
-
 const auth = useSupabaseAuthClient().auth
+const user = useSupabaseUser()
 const route = useRoute()
 const router = useRouter()
-const isLoggingIn = ref(false)
-const showPassword = ref(false)
-const dialogProps = reactive({
-    show: false,
-    title: '',
-    text: '',
-})
-const form = reactive({
-    email: '',
-    password: '',
-})
 
-async function Submit() {
-    if (!auth) return
-    if (isLoggingIn.value) return
+function Login(provider: any) {
+    let redirect = '/dashboard'
 
-    isLoggingIn.value = true
+    if (route.query.redirect) {
+        redirect = decodeURIComponent(route.query.redirect as string)
+    }
 
-    const { data, error } = await auth.signInWithPassword({
-        email: form.email,
-        password: form.password,
+    auth.signInWithOAuth({
+        provider: provider,
+        options: {
+            redirectTo: `${location.origin}/${redirect}`,
+        },
     })
-
-    if (error) {
-        isLoggingIn.value = false
-
-        return
-    }
-
-    if (!data.user) {
-        isLoggingIn.value = false
-        return
-    }
-
-    if (!route.query.redirect) return router.push('/dashboard')
-
-    router.replace(decodeURIComponent(route.query.redirect as string))
 }
 
-onBeforeMount(() => {
-    if (!route.query.dialog) return
+watch(
+    user,
+    (u) => {
+        if (!u) return
 
-    const dialog = JSON.parse(route.query.dialog as string)
+        let path = '/dashboard'
 
-    dialogProps.show = true
-    dialogProps.text = dialog.text
-    dialogProps.title = dialog.title
+        if (route.query.redirect) {
+            path = decodeURIComponent(route.query.redirect as string)
+        }
 
-    router.replace('/login')
-})
+        router.push(path)
+    },
+    {
+        immediate: true,
+    }
+)
 
 definePageMeta({
-    layout: 'auth',
+    layout: 'empty',
 })
 </script>
 
 <template>
-    <h2>Login</h2>
-
-    <div class="text-sm">
-        Don't have an account?
-
-        <nuxt-link to="/register">Register</nuxt-link>
-    </div>
-
-    <br />
-
-    <a-form layout="vertical" :model="form" :rules="Rules" @finish="Submit">
-        <a-form-item has-feedback label="Email" name="email">
-            <a-input v-model:value="form.email" placeholder="you@example.com" />
-        </a-form-item>
-
-        <a-form-item has-feedback label="Password" name="password">
-            <a-input v-model:value="form.password" type="password" />
-        </a-form-item>
-
-        <br />
-
-        <a-button
-            type="primary"
-            block
-            :loading="isLoggingIn"
-            html-type="submit"
-        >
-            Log in
-        </a-button>
-    </a-form>
-
-    <a-modal
-        v-model:visible="dialogProps.show"
-        :title="dialogProps.title"
-        :closable="false"
-        :footer="false"
-        :centered="true"
+    <div
+        class="top-0 bottom-0 left-0 right-0 fixed p-4 sm:grid sm:place-items-center"
     >
-        <p>{{ dialogProps.text }}</p>
+        <div
+            class="w-full max-w-sm mx-auto h-auto my-auto p-8 shadow-lg shadow-black/15 rounded-md bg-white"
+        >
+            <div class="h-10 flex gap-4 items-center">
+                <svg-logo-icon class="h-10" />
 
-        <br />
+                <svg-logo-name class="h-6" />
+            </div>
 
-        <a-button @click="dialogProps.show = false"> Okay </a-button>
-    </a-modal>
+            <br />
+
+            <h2>Login</h2>
+
+            <div class="text-sm">to continue using Luacel</div>
+
+            <br />
+
+            <a-space>
+                <a-button size="large" @click="Login('github')">
+                    <a-space>
+                        <icon name="fe:github" class="text-xl" />
+
+                        Github
+                    </a-space>
+                </a-button>
+
+                <a-divider type="vertical" />
+
+                <a-button size="large" @click="Login('discord')">
+                    <a-space>
+                        <icon name="bi:discord" class="text-xl" />
+
+                        Discord
+                    </a-space>
+                </a-button>
+            </a-space>
+        </div>
+    </div>
 </template>

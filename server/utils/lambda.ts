@@ -9,6 +9,7 @@ import {
     Runtime,
     DeleteFunctionCommand,
 } from '@aws-sdk/client-lambda'
+import { LambdaInsightsLayerARN } from 'assets/scripts/misc/lambda'
 
 export type RegionArnArgs = {
     arn: string
@@ -34,7 +35,7 @@ export const CreateFunction = ({
         region: region,
     })
 
-    const command = new CreateFunctionCommand({
+    const command = new CreateFunctionCommand({ 
         Code: { ZipFile: code },
         FunctionName: name,
         Role: process.env.AWS_ROLE_ARN,
@@ -42,7 +43,7 @@ export const CreateFunction = ({
         Handler: 'function.handler',
         PackageType: PackageType.Zip,
         Runtime: Runtime.provided,
-        Layers: [process.env.AWS_LAYER_ARN],
+        Layers: [process.env.AWS_LAYER_ARN, LambdaInsightsLayerARN[region]],
         Timeout: timeout,
         MemorySize: memory,
     })
