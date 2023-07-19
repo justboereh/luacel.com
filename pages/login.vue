@@ -14,7 +14,7 @@ function Login(provider: any) {
     auth.signInWithOAuth({
         provider: provider,
         options: {
-            redirectTo: `${location.origin}/${redirect}`,
+            redirectTo: `${location.origin}${redirect}`,
         },
     })
 }
@@ -44,7 +44,7 @@ definePageMeta({
 
 <template>
     <div
-        class="top-0 bottom-0 left-0 right-0 fixed p-4 sm:grid sm:place-items-center"
+        class="top-0 bottom-0 left-0 right-0 fixed p-4 grid place-items-center"
     >
         <div
             class="w-full max-w-sm mx-auto h-auto my-auto p-8 shadow-lg shadow-black/15 rounded-md bg-white"

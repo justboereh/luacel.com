@@ -22,7 +22,7 @@ watchOnce(app, (a) => {
     }
 })
 
-watchDebounced(toRefs(settings), (value, old) => {
+watchDebounced(Object.values(toRefs(settings)), (value, old) => {
     console.log(value, old)
     if (!old) return (canSubmit.value = false)
 

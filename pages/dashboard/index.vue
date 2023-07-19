@@ -2,6 +2,7 @@
 import { Rules, Regions } from '#rules/app'
 
 type App = {
+    id: string
     name: string
     event: { text: string }
     img: string
@@ -55,7 +56,7 @@ async function Submit() {
     if (isCreating.value) return
     isCreating.value = true
 
-    const { error } = await useFetch<string>('/api/apps', {
+    const { data, error } = await useFetch<string>('/api/apps', {
         method: 'PUT',
         body: {
             ...form,
@@ -70,7 +71,7 @@ async function Submit() {
         return
     }
 
-    useRouter().push(`/dashboard/${form.name}`)
+    useRouter().push(`/dashboard/app/${data.value}`)
 }
 
 definePageMeta({
@@ -115,7 +116,7 @@ useHead({ title: 'Dashboard : Luacel' })
                 >
                     <nuxt-link
                         class="h-20 flex gap-4"
-                        :to="`/dashboard/${app.name}/functions`"
+                        :to="`/dashboard/app/${app.id}/functions`"
                     >
                         <img
                             class="h-full rounded-md"

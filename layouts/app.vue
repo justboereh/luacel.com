@@ -3,68 +3,24 @@ import { App, AppFunction } from '#types/app'
 import { NuxtLink } from '#components'
 import { watchOnce } from '@vueuse/core'
 
-const app = ref<App>()
-const functions = ref<AppFunction[]>([])
+const stateApp = useState<App | null>('useStateApp', () => null)
+const stateFunctions = useState<AppFunction[]>('useStateFunctions', () => [])
 const route = useRoute()
-const refresh = ref<() => Promise<void>>()
-const fnPending = ref(true)
+const appTab = computed(() => route.path.split('/')[4])
+const path = computed(() => route.path.split('/').slice(0, 4).join('/'))
 
-const appTab = computed(() => route.path.split('/')[3])
-const path = computed(() => route.path.split('/').slice(0, 3).join('/'))
-
-watch(
-    computed(() => route.params.name),
-    async (name) => {
-        if (!name) return (app.value = undefined)
-
-        const { data } = await useFetch<App>(`/api/apps/${name}`, {
-            method: 'POST',
-        })
-
-        if (!data.value) return
-
-        app.value = data.value
-    },
-    { immediate: true }
-)
-
-watch(
-    app,
-    async (a) => {
-        if (!a) return
-
-        fnPending.value = true
-
-        const { data, refresh: r } = await useFetch<AppFunction[]>(
-            `/api/functions`,
-            {
-                method: 'POST',
-                body: {
-                    id: a.id,
-                },
-            }
-        )
-
-        watchOnce(data, (d) => (functions.value = d || []))
-        refresh.value = r
-
-        fnPending.value = false
-    },
+const { data: app } = await useFetch<App>(
+    () => `/api/apps/${route.params.appid}`,
     {
-        immediate: true,
+        method: 'POST',
     }
 )
+
+stateApp.value = app.value
 
 provide('useApp', app)
 provide('useAppTab', appTab)
 provide('useAppPath', path)
-provide('useFunctions', functions)
-provide('useFunctionsPending', fnPending)
-provide('useRefreshFunctions', () => {
-    if (!refresh.value) return Promise.resolve()
-
-    return refresh.value()
-})
 </script>
 
 <template>

@@ -7,13 +7,12 @@ import { App as AppT, AppFunction } from '#types/app'
 type AppRef = globalThis.Ref<AppT | undefined>
 type FunctionsRef = globalThis.Ref<AppFunction[]>
 type FunctionsPendingRef = globalThis.Ref<boolean>
-type RefreshFunctionsRef = () => Promise<void>
 
+const app = useState<AppT>('useStateApp')
+const functions = useState<AppFunction[]>('useStateFunctions')
 const showCreate = ref(false)
-const App = inject<AppRef>('useApp')
-const Functions = inject<FunctionsRef>('useFunctions')
-const isFunctionsPending = inject<FunctionsPendingRef>('useFunctionsPending')
-const RefreshFunctions = inject<RefreshFunctionsRef>('useRefreshFunctions')
+const refreshFunction = ref<() => Promise<void>>()
+const isPending = ref(false)
 
 const isRefreshing = ref(false)
 const isCreating = ref(false)
@@ -60,7 +59,7 @@ async function checkNameExists(name: string) {
 
 async function Submit() {
     if (isCreating.value) return
-    if (!App?.value) return
+    if (!app.value) return
 
     isCreating.value = true
 
@@ -76,7 +75,7 @@ async function Submit() {
         body: {
             name: form.name,
             code: await code.generateAsync({ type: 'array' }),
-            app: App.value.id,
+            app: app.value.id,
         },
     })
 
@@ -94,12 +93,12 @@ async function Submit() {
 }
 
 async function DeleteFunction(name: string) {
-    if (!App?.value) return
+    if (!app.value) return
 
     await useFetch(`/api/functions/${name}`, {
         method: 'delete',
         body: {
-            id: App.value?.id,
+            id: app.value.id,
         },
     })
 
@@ -108,14 +107,41 @@ async function DeleteFunction(name: string) {
 
 async function Refresh() {
     if (isRefreshing.value) return
-    if (!RefreshFunctions) return
+    if (!refreshFunction.value) return
+    isPending.value = true
 
     isRefreshing.value = true
 
-    await RefreshFunctions()
+    await refreshFunction.value()
 
+    isPending.value = false
     isRefreshing.value = false
 }
+
+watch(
+    app,
+    async (a) => {
+        if (!a) return
+        isPending.value = true
+
+        const { data, execute } = await useFetch<AppFunction[]>(
+            () => `/api/functions`,
+            {
+                method: 'POST',
+                body: {
+                    id: a.id,
+                },
+            }
+        )
+
+        isPending.value = false
+        if (!data.value) return
+
+        refreshFunction.value = execute
+        functions.value = data.value
+    },
+    { immediate: true }
+)
 
 definePageMeta({
     layout: 'app',
@@ -150,7 +176,7 @@ definePageMeta({
 
             <a-table
                 :columns="functionsColumns"
-                :data-source="Functions"
+                :data-source="functions"
                 size="small"
             >
                 <template #bodyCell="{ column, record }">
@@ -196,16 +222,16 @@ definePageMeta({
                     >
                         <icon
                             :name="
-                                isFunctionsPending
+                                isPending
                                     ? 'fluent:circle-line-24-regular'
                                     : 'fluent:document-error-24-regular'
                             "
                             class="text-4xl"
-                            :class="isFunctionsPending ? 'animate-spin' : ''"
+                            :class="isPending ? 'animate-spin' : ''"
                         />
 
                         {{
-                            isFunctionsPending
+                            isPending
                                 ? 'Data Pending...'
                                 : 'No functions created.'
                         }}

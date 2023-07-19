@@ -1,5 +1,5 @@
 import { rword } from 'rword'
-import { v4 } from 'uuid'
+import { nanoid } from 'nanoid'
 
 import { App } from '#types/app'
 import { serverSupabaseUser } from '#supabase/server'
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
         domain_set: '',
         region: body.region,
         author: user.id,
-        id: v4(),
+        id: nanoid(),
         created: Math.floor(Date.now()),
     }
 
@@ -59,5 +59,5 @@ export default defineEventHandler(async (event) => {
 
     await db.execute(InsertApp, Object.values(data))
 
-    return 'Ok'
+    return data.id
 })

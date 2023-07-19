@@ -5,7 +5,7 @@ import type { AppEvent, App, AppFunction } from '#types/app'
 import { serverSupabaseUser } from '#supabase/server'
 
 type Result = {
-    img?: string
+    id: string
     name: string
     event: { text: string }
     functions: any
@@ -36,8 +36,8 @@ export default defineEventHandler(async (event) => {
         const { rows: functions } = await db.execute(GetFunctionsQuery, [id])
 
         result[i] = {
+            id,
             name,
-            //img,
             event: (events[0] as { text: string }) || { text: 'no events yet' },
             functions: functions.length,
         }
