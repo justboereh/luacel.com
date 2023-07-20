@@ -2,37 +2,59 @@
 import { Rules } from '#rules/app'
 import { usePrevious, watchDebounced, watchOnce } from '@vueuse/core'
 
-const app = inject('useApp')
-const canSubmit = ref(false)
+const app = useState('useStateApp')
+const form = reactive({
+    updating: false,
+})
 const settings = reactive({
     name: '',
     region: '',
     domain_custom: '',
     domain_generated: '',
     domain_set: '',
-    timeout: '',
-    memory: '',
+    timeout: 1,
+    memory: 128,
 })
 
-watchOnce(app, (a) => {
-    for (const key of Object.keys(a)) {
-        if (!(key in settings)) continue
+async function UpdateSettings() {
+    if (form.updating) return
+    form.updating = true
 
-        settings[key] = a[key]
+    const { error } = await useFetch(`/api/apps/${app.value.id}`, {
+        method: 'PATCH',
+        body: settings,
+    })
+
+    form.updating = false
+
+    if (!error.value) return
+}
+
+watchOnce(
+    app,
+    (a) => {
+        for (const key of Object.keys(a)) {
+            if (!(key in settings)) continue
+
+            settings[key] = a[key]
+        }
+    },
+    {
+        immediate: true,
     }
-})
+)
 
 watchDebounced(Object.values(toRefs(settings)), (value, old) => {
-    console.log(value, old)
-    if (!old) return (canSubmit.value = false)
+    if (old.every((x) => x === '')) return (form.disabled = false)
+    if (!old) return (form.disabled = false)
 
     for (const key of Object.keys(value)) {
         if (value[key] === old[value]) continue
 
-        return (canSubmit.value = true)
+        return (form.disabled = true)
     }
 
-    canSubmit.value = true
+    form.disabled = true
 })
 
 definePageMeta({
@@ -43,26 +65,21 @@ definePageMeta({
 <template>
     <div class="p-4 sm:px-8">
         <div class="max-w-5xl mx-auto space-y-4">
-            <h2>General</h2>
+            <h1>General</h1>
 
             <p>Settings and options for the app.</p>
 
-            <a-form layout="vertical" :model="settings" :rules="Rules">
-                <a-form-item
-                    label="Name"
-                    name="name"
-                    class="max-w-md"
-                    hasFeedback
-                >
+            <a-form
+                layout="vertical"
+                :model="settings"
+                :rules="Rules"
+                @finish="UpdateSettings"
+            >
+                <a-form-item label="Name" name="name" class="max-w-md">
                     <a-input v-model:value="settings.name" />
                 </a-form-item>
 
-                <a-form-item
-                    label="Region"
-                    name="region"
-                    class="max-w-md"
-                    hasFeedback
-                >
+                <a-form-item label="Region" name="region" class="max-w-md">
                     <a-select :value="settings.region" disabled />
                 </a-form-item>
 
@@ -88,7 +105,7 @@ definePageMeta({
                     </a-col>
                 </a-row>
 
-                <a-form-item label="Subdomain" class="max-w-md" hasFeedback>
+                <a-form-item label="Subdomain" class="max-w-md">
                     <a-input
                         v-model:value="settings.domain_set"
                         :placeholder="settings.domain_generated"
@@ -96,7 +113,12 @@ definePageMeta({
                     />
                 </a-form-item>
 
-                <a-button type="primary" :disabled="!canSubmit">
+                <a-button
+                    type="primary"
+                    :disabled="form.updating"
+                    :loading="form.updating"
+                    html-type="submit"
+                >
                     Save settings
                 </a-button>
             </a-form>

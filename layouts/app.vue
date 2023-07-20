@@ -1,26 +1,37 @@
 <script setup lang="ts">
 import { App, AppFunction } from '#types/app'
 import { NuxtLink } from '#components'
-import { watchOnce } from '@vueuse/core'
 
-const stateApp = useState<App | null>('useStateApp', () => null)
-const stateFunctions = useState<AppFunction[]>('useStateFunctions', () => [])
+const app = useState<App | null>('useStateApp', () => null)
+const functions = useState<AppFunction[]>('useStateFunctions', () => [])
 const route = useRoute()
-const appTab = computed(() => route.path.split('/')[4])
-const path = computed(() => route.path.split('/').slice(0, 4).join('/'))
 
-const { data: app } = await useFetch<App>(
-    () => `/api/apps/${route.params.appid}`,
-    {
-        method: 'POST',
-    }
+watch(
+    route,
+    async ({ params }) => {
+        if (!params.appid) return
+        if (app.value && app.value.id === params.appid) return
+
+        const [{ data: appdata }, { data: functionsdata }] = await Promise.all([
+            useFetch<App>(() => `/api/apps/${params.appid}`, {
+                method: 'POST',
+            }),
+
+            useFetch<AppFunction[]>(() => `/api/functions`, {
+                method: 'POST',
+                body: {
+                    id: params.id,
+                },
+            }),
+        ])
+
+        if (!appdata.value) return useRouter().push('/dashboard')
+
+        app.value = appdata.value
+        functions.value = functionsdata.value || []
+    },
+    { immediate: true }
 )
-
-stateApp.value = app.value
-
-provide('useApp', app)
-provide('useAppTab', appTab)
-provide('useAppPath', path)
 </script>
 
 <template>
@@ -48,27 +59,32 @@ provide('useAppPath', path)
             </div>
         </div>
 
-        <div class="w-full relative">
-            <div
-                class="absolute bottom-0 w-screen h-px bg-light-900 bottom-0"
-            />
-
-            <div class="max-w-5xl mx-auto flex overflow-x-auto z-10">
-                <auth-tab
-                    name="functions"
-                    icon="fluent:math-formula-20-regular"
-                />
-
-                <auth-tab name="code" icon="file-icons:lua" />
-
-                <auth-tab
-                    name="insights"
-                    icon="fluent:arrow-trending-lines-20-regular"
-                />
-
-                <auth-tab name="settings" icon="fluent:settings-20-regular" />
-            </div>
-        </div>
+        <tabs
+            :tabs="[
+                {
+                    name: 'functions',
+                    icon: 'fluent:math-formula-20-regular',
+                    url: 'functions',
+                },
+                {
+                    name: 'code',
+                    icon: 'file-icons:lua',
+                    url: 'code',
+                },
+                {
+                    name: 'insights',
+                    icon: 'fluent:arrow-trending-lines-20-regular',
+                    url: 'insights',
+                },
+                {
+                    name: 'settings',
+                    icon: 'fluent:settings-20-regular',
+                    url: 'settings',
+                },
+            ]"
+            :tab="route.path.split('/')[4]"
+            :path="route.path.split('/').slice(0, 4).join('/')"
+        />
 
         <main class="flex-grow">
             <slot />

@@ -6,7 +6,7 @@
             <div class="text-xs space-y-2">
                 <p class="whitespace-nowrap font-bold">Services used:</p>
 
-                <span class="flex gap-4">
+                <span class="flex gap-2">
                     <nuxt-link to="https://aws.amazon.com">AWS</nuxt-link>
                     <nuxt-link to="https://cloudflare.com">
                         Cloudflare
@@ -15,6 +15,7 @@
                         Planetscale
                     </nuxt-link>
                     <nuxt-link to="https://supabase.com">Supabase</nuxt-link>
+                    <nuxt-link to="https://vercel.com">Vercel</nuxt-link>
                 </span>
             </div>
 

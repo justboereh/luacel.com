@@ -22,7 +22,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,
 
 type AppRef = globalThis.Ref<App | undefined>
 
-const app = inject<AppRef>('useApp')
+const app = useState<App>('useStateApp')
 const timerange = ref('Last 3 hours')
 const metrics = ref<DataResult[]>([])
 const isGettingMetrics = ref(false)

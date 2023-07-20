@@ -19,14 +19,6 @@ const user = useSupabaseUser()
                     </nuxt-link>
 
                     <div class="<sm:hidden flex items-center h-full gap-2">
-                        <nuxt-link
-                            v-if="user"
-                            to="/dashboard"
-                            class="p-2 text-dark-800"
-                        >
-                            Dashboard
-                        </nuxt-link>
-
                         <nuxt-link to="/pricing" class="p-2 text-dark-800">
                             Pricing
                         </nuxt-link>
@@ -36,8 +28,13 @@ const user = useSupabaseUser()
                         </nuxt-link>
                     </div>
 
-                    <nuxt-link v-if="!user" to="/login" class="<sm:hidden">
-                        <a-button type="primary"> Login </a-button>
+                    <nuxt-link
+                        :to="user ? '/dashboard' : '/login'"
+                        class="<sm:hidden"
+                    >
+                        <a-button type="primary">
+                            {{ user ? 'Dashboard' : 'Login' }}
+                        </a-button>
                     </nuxt-link>
 
                     <div class="sm:hidden">
@@ -52,12 +49,6 @@ const user = useSupabaseUser()
 
                             <template #overlay>
                                 <a-menu class="min-w-40">
-                                    <a-menu-item key="dashboard">
-                                        <nuxt-link to="/dashboard">
-                                            Dashboard
-                                        </nuxt-link>
-                                    </a-menu-item>
-
                                     <a-menu-item key="pricing">
                                         <nuxt-link to="/pricing">
                                             Pricing
@@ -70,7 +61,13 @@ const user = useSupabaseUser()
 
                                     <a-divider style="margin: 0"></a-divider>
 
-                                    <a-menu-item key="login">
+                                    <a-menu-item v-if="user" key="dashboard">
+                                        <nuxt-link to="/dashboard">
+                                            Dashboard
+                                        </nuxt-link>
+                                    </a-menu-item>
+
+                                    <a-menu-item v-if="!user" key="login">
                                         <nuxt-link to="/login">
                                             Login
                                         </nuxt-link>

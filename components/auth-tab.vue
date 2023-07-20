@@ -2,7 +2,7 @@
 import { App as AppT } from '#types/app'
 import { NuxtLink } from '#components'
 
-const app = inject<globalThis.Ref<AppT>>('useApp')
+const app = useState<AppT>('useStateApp')
 const tab = inject<globalThis.Ref<string>>('useAppTab')
 const path = inject<globalThis.Ref<string>>('useAppPath')
 
@@ -12,7 +12,7 @@ defineProps({ name: { type: String, required: true }, icon: String })
 <template>
     <nuxt-link
         class="px-4 py-2 capitalize relative"
-        :to="path && app ? `${path}/${name}` : '#'"
+        :to="path && app ? `${path}/${name}` : ''"
         :class="tab === name ? '' : 'text-dark-800'"
     >
         <span class="flex gap-2 items-center">
