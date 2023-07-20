@@ -96,6 +96,7 @@ const errorsCount = computed(() => {
 })
 
 async function GetMetrics() {
+    if (!app.value) return
     if (isGettingMetrics.value) return
     isGettingMetrics.value = true
 
@@ -113,18 +114,7 @@ async function GetMetrics() {
     metrics.value = data.value
 }
 
-function Stat(props: any, { slots }: { slots: any }) {
-    let value = props.value
-        ? h('p', { class: 'text-2xl' }, props.value)
-        : slots.default()
-
-    return h(Card, { ...props }, [
-        h('p', { class: 'text-sm text-dark-800/50' }, props.name),
-        value,
-    ])
-}
-
-GetMetrics()
+watch(app, GetMetrics, { immediate: true })
 definePageMeta({
     layout: 'app',
 })
