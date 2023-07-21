@@ -91,7 +91,7 @@ definePageMeta({
                     </a-space>
                 </a-button>
 
-                <a-button @click="Login('google')">
+                <a-button @click="Login('facebook')">
                     <a-space>
                         <icon name="bi:facebook" />
 
