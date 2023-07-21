@@ -41,7 +41,7 @@ const route = useRoute()
                 },
                 {
                     name: 'danger',
-                    icon: 'fluent:important-20-regular',
+                    icon: 'fluent:warning-20-regular',
                     url: 'danger',
                 },
             ]"

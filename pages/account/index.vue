@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usePrevious } from '@vueuse/core'
+import { useDark, usePrevious } from '@vueuse/core'
 import { Rules } from '#rules/user'
 
 const auth = useSupabaseAuthClient().auth

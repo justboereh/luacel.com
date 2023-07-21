@@ -30,9 +30,11 @@ async function UpdateSettings() {
     if (!error.value) return
 }
 
-watchOnce(
+watch(
     app,
     (a) => {
+        if (!a && location) return location.reload()
+
         for (const key of Object.keys(a)) {
             if (!(key in settings)) continue
 

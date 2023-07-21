@@ -1,71 +1,104 @@
 <script setup lang="ts">
 import { useRefHistory } from '@vueuse/core'
 import JSZip from 'jszip'
-import { App as AppT } from '#types/app'
+import { App, AppFunction } from '#types/app'
 import { watchDebounced } from '@vueuse/core'
 
-type AppRef = globalThis.Ref<AppT | undefined>
-type FunctionsRef = globalThis.Ref<{ name: string }[]>
+type Code = {
+    data: string
+    oldData: string | null
+    zip: typeof JSZip | null
+    cwf: string | null
+}
 
 const route = useRoute()
-const App = inject<AppRef>('useApp')
-const Functions = inject<FunctionsRef>('useFunctions')
+const app = useState<App>('useStateApp')
+const functions = useState<AppFunction[]>('useFunctions')
 const expandedKeys = ref()
 const selectedKeys = ref()
-const fnName = ref<string | null>(null)
-const cwFile = ref<string | null>(null)
-const zip = ref<typeof JSZip>()
-const oldcode = ref<string | null>(null)
-const code = ref<string>('')
-const codeHistory = useRefHistory(code)
+const func = reactive({
+    selected: '',
+    connecting: false, // fetching the selected func code
+    fetching: false, // fetching all functions
+})
+
+const code = reactive<Code>({
+    data: '',
+    oldData: null,
+    zip: null,
+    cwf: null,
+})
+const codeHistory = useRefHistory(toRef(code, 'data'))
 // prettier-ignore
 const mobileRegEx = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i
 const ismobile = ref(false)
 const dirs = computed(() => {
-    if (!zip.value) return []
+    if (!code.zip) return []
 
-    return Object.keys(zip.value.files).map((x) => ({ title: x, key: x }))
+    return Object.keys(code.zip.files).map((x) => ({ title: x, key: x }))
 })
 // prettier-ignore
 const testcode = ref('-- function.lua\n\nreturn function(req, res)\n   local name = req.header("x-name")\n\n   if not name then\n      res.status(401)\n      return res.send("who are you?")\n   end\n\n   if name ~= "mom" then\n      return res.send("you\'re not my mom")\n   end\n\n   res.send("hi mom")\nend')
 
 watchDebounced(
-    [selectedKeys, zip],
+    [selectedKeys, toRef(code.zip)],
     async ([skeys, z], [oldsKeys]) => {
-        if (!z) return (code.value = '')
-        if (!skeys) return (code.value = '')
+        if (!z) return (code.data = '')
+        if (!skeys) return (code.data = '')
         if (oldsKeys && skeys[0] === oldsKeys[0]) return
 
         const file = z.files[skeys[0]]
 
-        oldcode.value = code.value = await file.async('string')
+        code.oldData = code.data = await file.async('string')
     },
     { debounce: 500 }
 )
 
+async function ConnectFunction() {
+    if (func.selected === '') return
+    if (func.fetching) return
+    if (func.connecting) return
+    func.connecting = true
+
+    const { data } = await useFetch<number[]>(
+        `/api/functions/${func.selected}`,
+        {
+            method: 'POST',
+            body: {
+                id: app.value.id,
+            },
+        }
+    )
+
+    func.connecting = false
+    func.selected = ''
+    if (!data.value) return
+
+    const z = new JSZip()
+    await z.loadAsync(Uint8Array.from(data.value))
+
+    code.zip = z
+}
+
 watchDebounced(
-    [fnName],
-    async ([name]) => {
-        if (!name || !App || !App.value) return
+    app,
+    async (a) => {
+        if (!a) return
+        func.fetching = true
 
-        const { data } = await useFetch<number[]>(
-            `/api/functions/${name || ''}`,
-            {
-                method: 'POST',
-                body: {
-                    id: App.value.id,
-                },
-            }
-        )
+        const { data } = await useFetch<AppFunction[]>(() => `/api/functions`, {
+            method: 'POST',
+            body: {
+                id: a.id,
+            },
+        })
 
-        if (!data.value) return
-
-        const z = new JSZip()
-        await z.loadAsync(Uint8Array.from(data.value))
-
-        zip.value = z
+        func.fetching = false
+        functions.value = data.value || []
     },
-    { debounce: 500 }
+    {
+        immediate: true,
+    }
 )
 
 onMounted(() => {
@@ -74,7 +107,7 @@ onMounted(() => {
     if (!name) return
     if (Array.isArray(name)) name = name[0]
 
-    fnName.value = name as string
+    func.selected = name as string
 })
 
 onMounted(() => {
@@ -91,26 +124,42 @@ definePageMeta({
         <div class="max-w-5xl mx-auto space-y-4">
             <div v-if="ismobile">not supported on mobile</div>
 
-            <div v-else-if="!zip" class="grid place-items-center min-h-sm">
-                <a-form layout="vertical">
-                    <a-form-item label="Select function">
+            <div v-else-if="!code.zip" class="grid place-items-center min-h-lg">
+                <div class="text-center">
+                    <icon
+                        name="fluent:code-block-20-regular"
+                        class="text-6xl"
+                    />
+                    <h3>Select the function you'd like to connect to</h3>
+
+                    <br />
+
+                    <div class="selection">
+                        <span
+                            class="px-4 bg-light-500 grid place-items-center font-semibold"
+                        >
+                            Function
+                        </span>
+
                         <a-select
-                            v-model:value="fnName"
-                            :disabled="!!fnName"
-                            :loading="!!fnName"
+                            v-model:value="func.selected"
+                            :disabled="func.connecting"
+                            :loading="func.connecting"
+                            :bordered="false"
+                            class="min-w-20"
                         >
                             <a-select-option
-                                v-for="fn of Functions || []"
+                                v-for="fn of functions || []"
                                 :value="fn.name"
                             >
                                 {{ fn.name }}
                             </a-select-option>
                         </a-select>
-                    </a-form-item>
-                </a-form>
+                    </div>
+                </div>
             </div>
 
-            <div v-else="" class="flex">
+            <div v-else class="flex">
                 <div class="min-w-60">
                     <a-directory-tree
                         v-model:expandedKeys="expandedKeys"
@@ -135,3 +184,13 @@ definePageMeta({
         </div>
     </div>
 </template>
+
+<style scoped>
+.selection {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    display: flex;
+    width: fit-content;
+    margin: auto;
+}
+</style>
