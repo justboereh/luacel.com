@@ -8,7 +8,7 @@ async function Login(provider: any) {
     let redirect = '/dashboard'
 
     if (route.query.redirect) {
-        redirect = decodeURIComponent(route.query.redirect as string)
+        redirect = encodeURIComponent(route.query.redirect as string)
     }
 
     auth.signInWithOAuth({
@@ -22,6 +22,8 @@ async function Login(provider: any) {
 watch(
     user,
     (u) => {
+        console.log(u)
+
         if (!u) return
 
         let path = '/dashboard'

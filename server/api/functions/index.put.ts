@@ -40,8 +40,8 @@ export default defineEventHandler(async (event) => {
         name: funcid,
         code: Uint8Array.from(body.code),
         region: app.region,
-        memory: app.memory,
-        timeout: app.timeout,
+        memory: Number(app.memory),
+        timeout: Number(app.timeout),
     })
 
     await AddPermission({

@@ -8,6 +8,7 @@ import {
     PackageType,
     Runtime,
     DeleteFunctionCommand,
+    ListLayerVersionsCommand,
 } from '@aws-sdk/client-lambda'
 import { LambdaInsightsLayerARN } from 'assets/scripts/misc/lambda'
 
@@ -24,7 +25,16 @@ export type CreateFunctionArgs = {
     code: Uint8Array
 }
 
-export const CreateFunction = ({
+export const GetLuambdaVersion = (region: string) => {
+    const client = new LambdaClient({ region })
+
+    const command = new ListLayerVersionsCommand({
+        LayerName: 'Luambda',
+    })
+
+    return client.send(command)
+}
+export const CreateFunction = async ({
     name,
     code,
     region,
@@ -35,7 +45,20 @@ export const CreateFunction = ({
         region: region,
     })
 
-    const command = new CreateFunctionCommand({ 
+    const listLuambdaVersionsCmd = new ListLayerVersionsCommand({
+        LayerName: 'Luambda',
+    })
+
+    let { LayerVersions } = await client.send(listLuambdaVersionsCmd)
+
+    // prettier-ignore
+    if (!LayerVersions || !LayerVersions[0] || !LayerVersions[0].LayerVersionArn) {
+        LayerVersions = [{
+            LayerVersionArn : '',
+        }]
+    }
+
+    const command = new CreateFunctionCommand({
         Code: { ZipFile: code },
         FunctionName: name,
         Role: process.env.AWS_ROLE_ARN,
@@ -43,7 +66,10 @@ export const CreateFunction = ({
         Handler: 'function.handler',
         PackageType: PackageType.Zip,
         Runtime: Runtime.provided,
-        Layers: [process.env.AWS_LAYER_ARN, LambdaInsightsLayerARN[region]],
+        Layers: [
+            LayerVersions[0].LayerVersionArn as string,
+            LambdaInsightsLayerARN[region],
+        ],
         Timeout: timeout,
         MemorySize: memory,
     })
