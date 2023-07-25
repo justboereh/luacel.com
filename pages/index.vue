@@ -1,5 +1,9 @@
 <script setup lang="ts">
 const user = useSupabaseUser()
+
+useHead({
+    title: 'Luacel',
+})
 </script>
 
 <template>

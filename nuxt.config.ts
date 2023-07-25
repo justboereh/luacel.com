@@ -15,5 +15,7 @@ export default defineNuxtConfig({
         '@nuxtjs/supabase',
         'nuxt-icon',
         'nuxt-monaco-editor',
+        '@nuxt/content',
+        '@ant-design-vue/nuxt',
     ],
 })

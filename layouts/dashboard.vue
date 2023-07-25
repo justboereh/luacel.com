@@ -2,7 +2,7 @@
 
 <template>
     <div class="min-h-screen flex flex-col">
-        <div class="p-4 sm:px-8 sm:pt-8 bg-white">
+        <div class="p-4 sm:px-8 sm:pt-8 bg-[#fff2f2]">
             <div class="max-w-5xl mx-auto flex justify-between items-center">
                 <nuxt-link
                     to="/dashboard"
@@ -28,7 +28,6 @@
         <main class="flex-grow">
             <slot />
         </main>
-        
 
         <Footer />
     </div>

@@ -4,7 +4,7 @@ const user = useSupabaseUser()
 
 <template>
     <div class="h-screen w-screen flex flex-col">
-        <div class="sticky top-0 z-100 bg-white">
+        <div class="sticky top-0 z-100 bg-[#fff2f2]">
             <div class="p-4">
                 <div
                     class="max-w-5xl mx-auto h-8 flex justify-between items-center relative"
@@ -38,7 +38,7 @@ const user = useSupabaseUser()
                     </nuxt-link>
 
                     <div class="sm:hidden">
-                        <a-dropdown :trigger="['click']">
+                        <!-- <a-dropdown :trigger="['click']">
                             <a-button>
                                 <template #icon>
                                     <icon
@@ -74,7 +74,7 @@ const user = useSupabaseUser()
                                     </a-menu-item>
                                 </a-menu>
                             </template>
-                        </a-dropdown>
+                        </a-dropdown> -->
                     </div>
                 </div>
             </div>

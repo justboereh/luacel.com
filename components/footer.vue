@@ -6,22 +6,50 @@
             <div class="text-xs space-y-2">
                 <p class="whitespace-nowrap font-bold">Services used:</p>
 
-                <span class="flex gap-2">
-                    <nuxt-link to="https://aws.amazon.com">AWS</nuxt-link>
-                    <nuxt-link to="https://cloudflare.com">
-                        Cloudflare
-                    </nuxt-link>
-                    <nuxt-link to="https://planetscale.com">
+                <span class="flex">
+                    <a-button
+                        type="link"
+                        target="_blank"
+                        size="small"
+                        href="https://aws.amazon.com"
+                    >
+                        AWS
+                    </a-button>
+                    <a-button
+                        type="link"
+                        target="_blank"
+                        size="small"
+                        href="https://planetscale.com"
+                    >
                         Planetscale
-                    </nuxt-link>
-                    <nuxt-link to="https://supabase.com">Supabase</nuxt-link>
-                    <nuxt-link to="https://vercel.com">Vercel</nuxt-link>
+                    </a-button>
+                    <a-button
+                        type="link"
+                        target="_blank"
+                        size="small"
+                        href="https://supabase.com"
+                    >
+                        Supabase
+                    </a-button>
+                    <a-button
+                        type="link"
+                        target="_blank"
+                        size="small"
+                        href="https://vercel.com"
+                    >
+                        Vercel
+                    </a-button>
                 </span>
             </div>
 
-            <nuxt-link to="https://github.com/justboereh/luacel.com">
+            <a-button
+                type="link"
+                target="_blank"
+                size="small"
+                href="https://github.com/justboereh/luacel.com"
+            >
                 <icon name="fe:github" class="text-2xl" />
-            </nuxt-link>
+            </a-button>
         </div>
     </footer>
 </template>
