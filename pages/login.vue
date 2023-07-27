@@ -5,11 +5,7 @@ const route = useRoute()
 const router = useRouter()
 
 async function Login(provider: any) {
-    let redirect = '/dashboard'
-
-    if (route.query.redirect) {
-        redirect = encodeURIComponent(route.query.redirect as string)
-    }
+    let redirect = route.query.redirect || '/dashboard'
 
     auth.signInWithOAuth({
         provider: provider,

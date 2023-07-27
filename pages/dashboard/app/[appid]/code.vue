@@ -169,7 +169,7 @@ definePageMeta({
                 </div>
 
                 <div class="flex-grow">
-                    <MonacoEditor
+                    <!-- <LazyMonacoEditor
                         v-model="code"
                         class="min-h-sm"
                         :options="{
@@ -178,7 +178,7 @@ definePageMeta({
                             padding: { bottom: 14, top: 14 },
                         }"
                         lang="lua"
-                    />
+                    /> -->
                 </div>
             </div>
         </div>

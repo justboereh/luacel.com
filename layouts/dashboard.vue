@@ -2,7 +2,7 @@
 
 <template>
     <div class="min-h-screen flex flex-col">
-        <div class="p-4 sm:px-8 sm:pt-8 bg-[#fff2f2]">
+        <div class="p-4 sm:px-8 sm:pt-8 backdrop-blur">
             <div class="max-w-5xl mx-auto flex justify-between items-center">
                 <nuxt-link
                     to="/dashboard"
@@ -19,7 +19,7 @@
                     </nuxt-link>
 
                     <nuxt-link to="/account">
-                        <a-button type="bordered"> Account </a-button>
+                        <a-button type="text"> Account </a-button>
                     </nuxt-link>
                 </div>
             </div>

@@ -23,6 +23,7 @@
         "@aws-sdk/client-cloudwatch": "^3.369.0",
         "@aws-sdk/client-lambda": "^3.363.0",
         "@planetscale/database": "^1.8.0",
+        "@supabase/gotrue-js": "^2.46.0",
         "@vueuse/core": "^10.1.2",
         "ant-design-vue": "^4.0.0",
         "aws-crt": "^1.15.20",

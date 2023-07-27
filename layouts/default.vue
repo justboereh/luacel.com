@@ -4,7 +4,7 @@ const user = useSupabaseUser()
 
 <template>
     <div class="h-screen w-screen flex flex-col">
-        <div class="sticky top-0 z-100 bg-[#fff2f2]">
+        <div class="sticky top-0 z-100 backdrop-blur">
             <div class="p-4">
                 <div
                     class="max-w-5xl mx-auto h-8 flex justify-between items-center relative"
@@ -38,43 +38,52 @@ const user = useSupabaseUser()
                     </nuxt-link>
 
                     <div class="sm:hidden">
-                        <!-- <a-dropdown :trigger="['click']">
-                            <a-button>
-                                <template #icon>
-                                    <icon
-                                        name="fluent:line-horizontal-3-20-regular"
-                                    />
+                        <ClientOnly>
+                            <a-dropdown :trigger="['click']">
+                                <a-button>
+                                    <template #icon>
+                                        <icon
+                                            name="fluent:line-horizontal-3-20-regular"
+                                        />
+                                    </template>
+                                </a-button>
+
+                                <template #overlay>
+                                    <a-menu class="min-w-40">
+                                        <a-menu-item key="pricing">
+                                            <nuxt-link to="/pricing">
+                                                Pricing
+                                            </nuxt-link>
+                                        </a-menu-item>
+
+                                        <a-menu-item key="docs">
+                                            <nuxt-link to="/docs">
+                                                Docs
+                                            </nuxt-link>
+                                        </a-menu-item>
+
+                                        <a-divider
+                                            style="margin: 0"
+                                        ></a-divider>
+
+                                        <a-menu-item
+                                            v-if="user"
+                                            key="dashboard"
+                                        >
+                                            <nuxt-link to="/dashboard">
+                                                Dashboard
+                                            </nuxt-link>
+                                        </a-menu-item>
+
+                                        <a-menu-item v-if="!user" key="login">
+                                            <nuxt-link to="/login">
+                                                Login
+                                            </nuxt-link>
+                                        </a-menu-item>
+                                    </a-menu>
                                 </template>
-                            </a-button>
-
-                            <template #overlay>
-                                <a-menu class="min-w-40">
-                                    <a-menu-item key="pricing">
-                                        <nuxt-link to="/pricing">
-                                            Pricing
-                                        </nuxt-link>
-                                    </a-menu-item>
-
-                                    <a-menu-item key="docs">
-                                        <nuxt-link to="/docs"> Docs </nuxt-link>
-                                    </a-menu-item>
-
-                                    <a-divider style="margin: 0"></a-divider>
-
-                                    <a-menu-item v-if="user" key="dashboard">
-                                        <nuxt-link to="/dashboard">
-                                            Dashboard
-                                        </nuxt-link>
-                                    </a-menu-item>
-
-                                    <a-menu-item v-if="!user" key="login">
-                                        <nuxt-link to="/login">
-                                            Login
-                                        </nuxt-link>
-                                    </a-menu-item>
-                                </a-menu>
-                            </template>
-                        </a-dropdown> -->
+                            </a-dropdown>
+                        </ClientOnly>
                     </div>
                 </div>
             </div>

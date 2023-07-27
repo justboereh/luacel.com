@@ -12,10 +12,10 @@ export default defineNuxtConfig({
     },
     modules: [
         '@unocss/nuxt',
-        '@nuxtjs/supabase',
         'nuxt-icon',
         'nuxt-monaco-editor',
         '@nuxt/content',
-        '@ant-design-vue/nuxt',
+        // '@ant-design-vue/nuxt',
+        '@nuxtjs/supabase',
     ],
 })

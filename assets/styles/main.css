@@ -3,8 +3,8 @@
 body {
     background-image: linear-gradient(
         174.2deg,
-        #fff2f2 7.1%,
-        hsl(255, 33%, 98%) 67.4%
+        rgb(247, 247, 247) 7.1%,
+        rgb(239, 239, 239) 67.4%
     );
 
     font-family: 'Poppins', sans-serif;
@@ -17,12 +17,16 @@ body {
 
 @media (min-width: 640px) {
     ::-webkit-scrollbar {
-        background: hsl(0, 0%, 10%);
+        background-image: linear-gradient(
+            -174.2deg,
+            rgb(247, 247, 247) 7.1%,
+            rgb(239, 239, 239) 67.4%
+        );
         width: 0.75rem;
     }
 
     ::-webkit-scrollbar-thumb {
-        background: hsl(0, 0%, 15%);
+        background: hsl(0, 0%, 75%);
         border-radius: 1rem;
     }
 }

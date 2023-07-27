@@ -154,7 +154,7 @@ useHead({ title: 'Dashboard : Luacel' })
     </main>
 
     <a-modal
-        v-model:visible="showCreate"
+        v-model:open="showCreate"
         title="Create app"
         :centered="true"
         :destroyOnClose="true"
