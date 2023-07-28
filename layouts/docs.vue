@@ -6,7 +6,7 @@ useHead({
 </script>
 
 <template>
-    <div class="h-screen w-screen flex flex-col">
+    <div class="min-h-screen w-screen flex flex-col">
         <div class="sticky top-0 z-100 backdrop-blur">
             <div class="p-4">
                 <div

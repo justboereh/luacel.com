@@ -4,27 +4,27 @@ import { Rules } from '#rules/user'
 const user = useCurrentUser()
 const route = useRoute()
 const router = useRouter()
-const isLoggingIn = ref(false)
+const isRegister = ref(false)
+const showPassword = ref(false)
 const form = reactive({
     username: '',
     password: '',
+    confirm: '',
 })
 
-function redirect() {
-    let to = '/dashboard'
+Rules.confirm[0].validator = async (_, value: string) => {
+    if (!value) return Promise.reject('Required')
+    if (form.password !== value)
+        return Promise.reject('Does not match password')
 
-    if (route.query.redirect) {
-        to = decodeURIComponent(route.query.redirect as string)
-    }
-
-    router.push(to)
+    return Promise.resolve()
 }
 
-async function Login() {
-    if (isLoggingIn.value) return
-    isLoggingIn.value = true
+async function Register() {
+    if (isRegister.value) return
+    isRegister.value = true
 
-    const { error } = await useFetch('/api/account/login', {
+    const { error } = await useFetch('/api/account/register', {
         method: 'POST',
         body: {
             username: form.username,
@@ -32,22 +32,12 @@ async function Login() {
         },
     })
 
-    isLoggingIn.value = false
+    isRegister.value = false
+
     if (error.value) return
 
-    redirect()
+    router.push('/login')
 }
-
-watch(
-    user,
-    (u) => {
-        if (!u) return
-        console.log(u)
-
-        redirect()
-    },
-    { immediate: true }
-)
 
 definePageMeta({
     layout: 'empty',
@@ -72,12 +62,12 @@ definePageMeta({
 
             <br />
 
-            <h1>Login</h1>
+            <h1>Register</h1>
 
             <p class="text-sm">
-                Need an account?
-                <nuxt-link to="/register">
-                    <a-button type="link" size="small"> Register </a-button>
+                Have an account?
+                <nuxt-link to="/login">
+                    <a-button type="link" size="small"> Login </a-button>
                 </nuxt-link>
             </p>
 
@@ -87,23 +77,27 @@ definePageMeta({
                 :rules="Rules"
                 :model="form"
                 layout="vertical"
-                @finish="Login"
+                @finish="Register"
             >
                 <a-form-item label="Username" name="username">
                     <a-input v-model:value="form.username" />
                 </a-form-item>
 
                 <a-form-item label="Password" name="password">
-                    <a-input v-model:value="form.password" type="password" />
+                    <a-input-password v-model:value="form.password" />
+                </a-form-item>
+
+                <a-form-item label="Confirm Password" name="confirm">
+                    <a-input-password v-model:value="form.confirm" />
                 </a-form-item>
 
                 <a-button
                     type="primary"
                     html-type="submit"
-                    :loading="isLoggingIn"
-                    :disabled="isLoggingIn"
+                    :loading="isRegister"
+                    :disabled="isRegister"
                 >
-                    Login
+                    Register Now
                 </a-button>
             </a-form>
         </div>

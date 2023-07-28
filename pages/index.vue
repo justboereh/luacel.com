@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const user = useSupabaseUser()
+const user = useCurrentUser()
 
 useHead({
     title: 'Luacel',
@@ -20,9 +20,8 @@ useHead({
                 to use and deploy the programming language, Lua, to millions of
                 users.
             </p>
-
             <div class="flex justify-center gap-4">
-                <nuxt-link :to="user ? '/dashboard' : '/login'">
+                <nuxt-link :to="user ? '/dashboard' : '/register'">
                     <a-button type="primary" size="large">
                         Get started
                     </a-button>

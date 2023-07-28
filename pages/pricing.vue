@@ -129,18 +129,27 @@ useHead({
 <template>
     <div class="p-4">
         <div class="max-w-5xl mx-auto">
-            <h1 class="text-5xl text-center mb-12 pt-8">Pricing</h1>
+            <h1 class="text-5xl text-center mb-12 pt-8">
+                Simple, Transparent Pricing
+            </h1>
 
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <a-card v-for="plan of Plans" :title="plan.title">
-                    <template #extra>
-                        <div class="flex flex-col items-center">
-                            <span class="text-xl">${{ plan.price }}</span>
-                            <span class="text-xs text-dark-800/50">
-                                / month
-                            </span>
-                        </div>
-                    </template>
+                <a-card v-for="plan of Plans">
+                    <h3>{{ plan.title }}</h3>
+
+                    <p>
+                        <span class="text-2xl font-bold">
+                            ${{ plan.price }}
+                        </span>
+
+                        <br />
+
+                        <span class="text-sm text-black/50">
+                            per app, per month
+                        </span>
+                    </p>
+
+                    <br />
 
                     <div class="flex flex-col gap-2">
                         <span
@@ -173,8 +182,7 @@ useHead({
                 :dataSource="PricingData"
                 :columns="PricingColumns"
                 :pagination="false"
-            >
-            </a-table>
+            />
         </div>
     </div>
 </template>

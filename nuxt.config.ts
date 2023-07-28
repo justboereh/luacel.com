@@ -18,4 +18,11 @@ export default defineNuxtConfig({
         // '@ant-design-vue/nuxt',
         '@nuxtjs/supabase',
     ],
+    supabase: {
+        client: {
+            auth: {
+                detectSessionInUrl: true,
+            },
+        },
+    },
 })

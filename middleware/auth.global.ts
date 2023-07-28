@@ -1,5 +1,7 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-    const user = useSupabaseUser()
+    const user = useCurrentUser()
+
+    console.log(user.value, 'middleware')
 
     const authPaths = ['/login', '/register']
 

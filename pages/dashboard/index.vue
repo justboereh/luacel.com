@@ -9,7 +9,7 @@ type App = {
     functions: any
 }
 
-const auth = useSupabaseAuthClient().auth
+const user = useCurrentUser()
 const search = ref('')
 const showCreate = ref(false)
 const isCreating = ref(false)

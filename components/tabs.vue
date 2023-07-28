@@ -19,9 +19,11 @@ defineProps<Props>()
         <div class="max-w-5xl mx-auto flex overflow-x-auto z-10">
             <nuxt-link
                 v-for="thistab of tabs"
-                class="px-4 py-2 capitalize relative"
+                class="px-4 py-2 capitalize relative no-underline"
                 :to="`${path}/${thistab.url}`"
-                :class="thistab.url === tab ? '' : 'text-dark-800'"
+                :class="
+                    thistab.url === tab ? 'text-[#1677ff]' : 'text-dark-800'
+                "
             >
                 <span class="flex gap-2 items-center">
                     <icon v-if="thistab.icon" :name="thistab.icon" />
@@ -31,7 +33,9 @@ defineProps<Props>()
 
                 <div
                     class="absolute w-full h-px left-0 bottom-0"
-                    :class="tab === thistab.url ? 'bg-blue' : 'bg-light-900'"
+                    :class="
+                        tab === thistab.url ? 'bg-[#1677ff]' : 'bg-light-900'
+                    "
                 />
             </nuxt-link>
         </div>

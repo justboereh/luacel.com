@@ -13,9 +13,9 @@
                     <svg-logo-name class="h-1/2 <sm:hidden" />
                 </nuxt-link>
 
-                <div class="flex gap-4 items-center">
+                <div class="flex items-center">
                     <nuxt-link to="/docs">
-                        <a-button> Docs </a-button>
+                        <a-button type="text"> Docs </a-button>
                     </nuxt-link>
 
                     <nuxt-link to="/account">

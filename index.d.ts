@@ -6,6 +6,7 @@ declare global {
             AWS_LAYER_ARN: string
 
             DATABASE_URL: string
+            CLERK_PK: string
         }
     }
 }

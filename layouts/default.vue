@@ -1,10 +1,10 @@
 <script setup lang="ts">
-const user = useSupabaseUser()
+const user = useCurrentUser()
 </script>
 
 <template>
-    <div class="h-screen w-screen flex flex-col">
-        <div class="sticky top-0 z-100 backdrop-blur">
+    <div class="min-h-screen w-full flex flex-col">
+        <div class="sticky w-full top-0 z-100 backdrop-blur">
             <div class="p-4">
                 <div
                     class="max-w-5xl mx-auto h-8 flex justify-between items-center relative"
