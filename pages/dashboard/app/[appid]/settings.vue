@@ -2,9 +2,12 @@
 import { Rules } from '#rules/app'
 import { usePrevious, watchDebounced, watchOnce } from '@vueuse/core'
 
+const route = useRoute()
+const router = useRouter()
 const app = useState('useStateApp')
 const form = reactive({
     updating: false,
+    deleting: false,
 })
 const settings = reactive({
     name: '',
@@ -20,7 +23,7 @@ async function UpdateSettings() {
     if (form.updating) return
     form.updating = true
 
-    const { error } = await useFetch(`/api/apps/${app.value.id}`, {
+    const { error } = await useFetch(() => `/api/apps/${route.params.appid}`, {
         method: 'PATCH',
         body: settings,
     })
@@ -28,6 +31,21 @@ async function UpdateSettings() {
     form.updating = false
 
     if (!error.value) return
+}
+
+async function DeleteApp() {
+    if (form.deleting) return
+    form.deleting = true
+
+    const { error } = await useFetch(() => `/api/apps/${route.params.appid}`, {
+        method: 'DELETE',
+    })
+
+    if (error.value) {
+        return
+    }
+
+    router.push('/dashboard')
 }
 
 watch(
@@ -73,6 +91,7 @@ definePageMeta({
 
             <a-form
                 layout="vertical"
+                autocomplete="off"
                 :model="settings"
                 :rules="Rules"
                 @finish="UpdateSettings"
@@ -126,6 +145,22 @@ definePageMeta({
                     Save settings
                 </a-button>
             </a-form>
+
+            <br />
+
+            <h1>Danger</h1>
+
+            <p>Dangerous actions for the app.</p>
+
+            <a-button
+                danger
+                ghost
+                :disabled="form.deleting"
+                :loading="form.deleting"
+                @click="DeleteApp"
+            >
+                Delete app
+            </a-button>
         </div>
     </div>
 </template>

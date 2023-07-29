@@ -1,12 +1,9 @@
-export type DataProps = {
-    timestamps: Date[]
-    values: number[]
-}
+export type QueryLogsResult = Array<{ field: string; value: string }>
 
 export type DataResult = {
     name: string
-    invocations: DataProps | null
-    duration: DataProps | null
-    avgduration: DataProps | null
-    errors: DataProps | null
+    invocations: Record<string, any>
+    memory: QueryLogsResult[]
+    duration: Record<string, any>
+    errors: Record<string, any>
 }

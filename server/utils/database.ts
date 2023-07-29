@@ -73,11 +73,10 @@ type DeleteFunctionFromDBArgs = {
 type DeleteFunctionFromDBReturn = ExecutedQuery
 
 // prettier-ignore
-const DeleteFunctionQuery = 'delete from functions where app = ? and app = (select id from apps where id = ? and author = ?) and functions.name = ?'
+const DeleteFunctionQuery = 'delete from functions where app = (select id from apps where id = ? and author = ?) and functions.name = ?'
 
 export function DeleteFunctionFromDB(args: DeleteFunctionFromDBArgs) {
     return db.execute(DeleteFunctionQuery, [
-        args.appid,
         args.appid,
         args.userid,
         args.fnname,

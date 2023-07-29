@@ -22,6 +22,7 @@ ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale,
 
 type AppRef = globalThis.Ref<App | undefined>
 
+const route = useRoute()
 const app = useState<App>('useStateApp')
 const timerange = ref('Last 3 hours')
 const metrics = ref<DataResult[]>([])
@@ -30,11 +31,14 @@ const isGettingMetrics = ref(false)
 const invocationsCount = computed(() => {
     if (!metrics.value) return 0
 
-    return metrics.value.reduce((a: number, func) => {
-        const value = func.invocations?.values.reduce((ac, cu) => ac + cu, 0)
+    return (
+        metrics.value.reduce((a: number, func) => {
+            const values = Object.values(func.invocations)
+            const value = values.reduce((ac, cu) => ac + cu, 0)
 
-        return a + (value ? value : 0)
-    }, 0)
+            return a + (value ? value : 0)
+        }, 0) || 0
+    )
 })
 
 const invocationsChart = computed(() => {
@@ -43,38 +47,22 @@ const invocationsChart = computed(() => {
     if (!metrics.value) return result
 
     metrics.value.every((func) => {
-        const data = func.invocations?.timestamps.map((timestamp, index) => ({
-            x: dayjs(timestamp).format('h:m a'),
-            y: func.invocations?.values[index],
-        }))
-
         result.datasets.push({
             label: func.name,
-            data,
+            data: func.invocations,
         })
     })
 
     return result
 })
 
-const totalDuration = computed(() => {
-    if (!metrics.value) return 0
-
-    const v = metrics.value.reduce((a: number, func) => {
-        const value = func.duration?.values.reduce((ac, cu) => ac + cu, 0)
-
-        return a + (value ? value : 0)
-    }, 0)
-
-    return Math.floor(v / 10) / 100
-})
-
 const averageDuration = computed(() => {
     if (!metrics.value) return 0
 
     const v = metrics.value.reduce((a: number, func) => {
-        const firstvalue = func.duration?.values[0] || 0
-        const value = func.duration?.values.reduce(
+        const values = Object.values(func.duration)
+        const firstvalue = values[0] || 0
+        const value = values.reduce(
             (ac: number, cu) => (ac + cu) / 2,
             firstvalue
         )
@@ -82,30 +70,46 @@ const averageDuration = computed(() => {
         return (a + (value ? value : 0)) / 2
     }, 0)
 
-    return (totalDuration.value / invocationsCount.value).toFixed(2) || 0
+    return v || 0
+})
+
+const averageMemory = computed(() => {
+    if (!metrics.value) return 0
+
+    const v = metrics.value.reduce((a: number, { memory }) => {
+        const value = memory.reduce(
+            (ac: number, cu) => (ac + Number(cu[1].value)) / 2,
+            0
+        )
+
+        return (a + (value ? value : 0)) / 2
+    }, 0)
+
+    return v || 0
 })
 
 const errorsCount = computed(() => {
     if (!metrics.value) return 0
 
     return metrics.value.reduce((a: number, func) => {
-        const value = func.errors?.values.reduce((ac, cu) => ac + cu, 0)
+        const values = Object.values(func.errors)
+        const value = values.reduce((ac, cu) => ac + cu, 0)
 
         return a + (value ? value : 0)
     }, 0)
 })
 
 async function GetMetrics() {
-    if (!app.value) return
+    if (!route.params.appid) return
     if (isGettingMetrics.value) return
     isGettingMetrics.value = true
 
-    const { data } = await useFetch<DataResult[]>('/api/insights', {
-        method: 'POST',
-        body: {
-            id: app?.value?.id,
-        },
-    })
+    const { data } = await useFetch<DataResult[]>(
+        () => `/api/apps/${route.params.appid}/insights`,
+        {
+            method: 'POST',
+        }
+    )
 
     isGettingMetrics.value = false
 
@@ -114,7 +118,7 @@ async function GetMetrics() {
     metrics.value = data.value
 }
 
-watch(app, GetMetrics, { immediate: true })
+watch(route, GetMetrics, { immediate: true })
 definePageMeta({
     layout: 'app',
 })
@@ -140,19 +144,18 @@ definePageMeta({
                 </a-col>
 
                 <a-col>
-                    <a-select v-model:value="timerange">
-                        <a-select-option value="Last 3 hours">
-                            Last 3 hours
-                        </a-select-option>
-                    </a-select>
+                    <ClientOnly>
+                        <a-select v-model:value="timerange">
+                            <a-select-option value="Last 3 hours">
+                                Last 3 hours
+                            </a-select-option>
+                        </a-select>
+                    </ClientOnly>
                 </a-col>
             </a-row>
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <insights-stat
-                    name="Invocations Count"
-                    :value="invocationsCount"
-                />
+                <insights-stat name="Invocations" :value="invocationsCount" />
 
                 <insights-stat name="Error">
                     <span class="text-red text-2xl">
@@ -161,13 +164,13 @@ definePageMeta({
                 </insights-stat>
 
                 <insights-stat
-                    name="Total Duration"
-                    :value="totalDuration + ' sec'"
+                    name="Average Duration"
+                    :value="averageDuration + ' sec'"
                 />
 
                 <insights-stat
-                    name="Average Duration"
-                    :value="averageDuration + ' sec'"
+                    name="Average Memory Usage"
+                    :value="averageMemory + ' MB'"
                 />
 
                 <insights-stat name="Invocations" class="col-span-2 row-span-2">

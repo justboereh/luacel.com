@@ -4,12 +4,12 @@ export async function GetAppFunctions() {
     const route = useRoute()
     const stateFunctions = useState<AppFunction[]>('useStateFunctions')
 
-    const { data } = await useFetch<AppFunction[]>(() => `/api/functions`, {
-        method: 'POST',
-        body: {
-            id: () => route.params.appid,
-        },
-    })
+    const { data } = await useFetch<AppFunction[]>(
+        () => `/api/apps/${route.params.appid}/functions`,
+        {
+            method: 'POST',
+        }
+    )
 
     if (!data.value) return
 

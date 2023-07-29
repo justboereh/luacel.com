@@ -8,11 +8,20 @@ type AppRef = globalThis.Ref<AppT | undefined>
 type FunctionsRef = globalThis.Ref<AppFunction[]>
 type FunctionsPendingRef = globalThis.Ref<boolean>
 
+const route = useRoute()
 const app = useState<AppT>('useStateApp')
-const functions = useState<AppFunction[]>('useStateFunctions')
 const showCreate = ref(false)
 const refreshFunction = ref<() => Promise<void>>()
 const isPending = ref(false)
+
+const {
+    data: functions,
+    execute,
+    pending,
+} = useFetch<AppFunction[]>(() => `/api/apps/${route.params.appid}/functions`, {
+    method: 'POST',
+    watch: [route],
+})
 
 const isRefreshing = ref(false)
 const isCreating = ref(false)
@@ -70,14 +79,16 @@ async function Submit() {
         'return function(req, res, kv)\n\tres.send("hi mom")\nend'
     )
 
-    const { error } = await useFetch('/api/functions', {
-        method: 'PUT',
-        body: {
-            name: form.name,
-            code: await code.generateAsync({ type: 'array' }),
-            app: app.value.id,
-        },
-    })
+    const { error } = await useFetch(
+        () => `/api/apps/${route.params.appid}/functions`,
+        {
+            method: 'PUT',
+            body: {
+                name: form.name,
+                code: await code.generateAsync({ type: 'array' }),
+            },
+        }
+    )
 
     isCreating.value = false
 
@@ -87,61 +98,20 @@ async function Submit() {
         return
     }
 
-    Refresh()
-
     showCreate.value = false
+
+    execute()
 }
 
 async function DeleteFunction(name: string) {
     if (!app.value) return
 
-    await useFetch(`/api/functions/${name}`, {
+    await useFetch(() => `/api/apps/${route.params.appid}/functions/${name}`, {
         method: 'delete',
-        body: {
-            id: app.value.id,
-        },
     })
 
-    Refresh()
+    execute()
 }
-
-async function Refresh() {
-    if (isRefreshing.value) return
-    if (!refreshFunction.value) return
-    isPending.value = true
-
-    isRefreshing.value = true
-
-    await refreshFunction.value()
-
-    isPending.value = false
-    isRefreshing.value = false
-}
-
-watch(
-    app,
-    async (a) => {
-        if (!a) return
-        isPending.value = true
-
-        const { data, execute } = await useFetch<AppFunction[]>(
-            () => `/api/functions`,
-            {
-                method: 'POST',
-                body: {
-                    id: a.id,
-                },
-            }
-        )
-
-        isPending.value = false
-        if (!data.value) return
-
-        refreshFunction.value = execute
-        functions.value = data.value
-    },
-    { immediate: true }
-)
 
 definePageMeta({
     layout: 'app',
@@ -153,12 +123,12 @@ definePageMeta({
         <div class="max-w-5xl mx-auto space-y-4">
             <a-row justify="end" :gutter="[16]">
                 <a-col>
-                    <a-button :disabled="isRefreshing" @click="Refresh">
+                    <a-button :disabled="pending" @click="execute">
                         <template #icon>
                             <icon
                                 name="fluent:arrow-counterclockwise-16-regular"
                                 :style="
-                                    isRefreshing
+                                    pending
                                         ? 'animation: spin 0.5s linear infinite;'
                                         : ''
                                 "
@@ -224,16 +194,16 @@ definePageMeta({
                     >
                         <icon
                             :name="
-                                isPending
+                                pending
                                     ? 'fluent:circle-line-24-regular'
                                     : 'fluent:document-error-24-regular'
                             "
                             class="text-4xl"
-                            :class="isPending ? 'animate-spin' : ''"
+                            :class="pending ? 'animate-spin' : ''"
                         />
 
                         {{
-                            isPending
+                            pending
                                 ? 'Data Pending...'
                                 : 'No functions created.'
                         }}
@@ -256,6 +226,7 @@ definePageMeta({
         <a-form
             ref="formEl"
             layout="vertical"
+            autocomplete="off"
             :model="form"
             :rules="Rules"
             @finish="Submit"

@@ -42,7 +42,7 @@
                 </span>
             </div>
 
-            <p class="text-sm">© 2023 Luacel Inc. All rights reserved.</p>
+            <span class="text-sm">© 2023 Luacel Inc. All rights reserved.</span>
 
             <a-button
                 type="link"

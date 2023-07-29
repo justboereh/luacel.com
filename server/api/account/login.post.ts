@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
 
     const { rows } = await db.execute(UserPasswordQuery, [username])
     const dbUser = rows[0] as DatabaseUser
-    const hashed = encodeJWT(password)
+    const hashed = encodeJWT(password, dbUser.id)
 
     if (!dbUser) return BadRequest(event)
     if (dbUser.password.length !== hashed.length) return BadRequest(event)

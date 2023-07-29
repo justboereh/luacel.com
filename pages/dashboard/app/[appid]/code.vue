@@ -61,12 +61,9 @@ async function ConnectFunction() {
     func.connecting = true
 
     const { data } = await useFetch<number[]>(
-        `/api/functions/${func.selected}`,
+        () => `/api/apps/${route.params.appid}/functions/${func.selected}`,
         {
             method: 'POST',
-            body: {
-                id: app.value.id,
-            },
         }
     )
 
@@ -86,12 +83,12 @@ watchDebounced(
         if (!a) return
         func.fetching = true
 
-        const { data } = await useFetch<AppFunction[]>(() => `/api/functions`, {
-            method: 'POST',
-            body: {
-                id: a.id,
-            },
-        })
+        const { data } = await useFetch<AppFunction[]>(
+            () => `/api/apps/${route.params.appid}/functions`,
+            {
+                method: 'POST',
+            }
+        )
 
         func.fetching = false
         functions.value = data.value || []

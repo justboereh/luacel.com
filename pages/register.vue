@@ -5,20 +5,39 @@ const user = useCurrentUser()
 const route = useRoute()
 const router = useRouter()
 const isRegister = ref(false)
-const showPassword = ref(false)
 const form = reactive({
     username: '',
     password: '',
     confirm: '',
 })
 
-Rules.confirm[0].validator = async (_, value: string) => {
-    if (!value) return Promise.reject('Required')
-    if (form.password !== value)
-        return Promise.reject('Does not match password')
+Rules.username.push({
+    required: true,
+    trigger: 'change',
+    async validator(_, v: string) {
+        const { error } = await useFetch('/api/account/username-exists', {
+            method: 'POST',
+            body: {
+                username: form.username,
+            },
+        })
 
-    return Promise.resolve()
-}
+        if (error.value) return Promise.reject('Username exists')
+
+        return Promise.resolve()
+    },
+})
+
+Rules.confirm.push({
+    required: true,
+    trigger: 'change',
+    async validator(_, value: string) {
+        if (form.password !== value)
+            return Promise.reject('Does not match password')
+
+        return Promise.resolve()
+    },
+})
 
 async function Register() {
     if (isRegister.value) return
@@ -35,6 +54,10 @@ async function Register() {
     isRegister.value = false
 
     if (error.value) return
+
+    Rules.username.pop()
+
+    console.log(Rules.username)
 
     router.push('/login')
 }
@@ -74,9 +97,10 @@ definePageMeta({
             <br />
 
             <a-form
-                :rules="Rules"
+                :rules="{ ...Rules }"
                 :model="form"
                 layout="vertical"
+                autocomplete="off"
                 @finish="Register"
             >
                 <a-form-item label="Username" name="username">

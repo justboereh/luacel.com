@@ -80,6 +80,11 @@ const Plans = [
     {
         title: 'Pro',
         price: '20',
+        class: 'shadow-xl shadow-black/15',
+        ribbon: {
+            text: 'Popular',
+            class: 'bg-red-500 text-white',
+        },
         features: [
             '300 functions',
             '100K requests per day',
@@ -134,7 +139,11 @@ useHead({
             </h1>
 
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <a-card v-for="plan of Plans">
+                <a-card
+                    v-for="plan of Plans"
+                    :class="plan.class || ''"
+                    bodyStyle="position: relative; overflow:hidden;"
+                >
                     <h3>{{ plan.title }}</h3>
 
                     <p>
@@ -162,8 +171,15 @@ useHead({
                                 <icon name="fluent:checkmark-20-regular" />
                             </span>
 
-                            <span>{{ feature }}</span>
+                            <span>{{ feature }}</span>  
                         </span>
+                    </div>
+
+                    <div
+                        v-if="plan.ribbon"
+                        :class="`absolute px-2 -right-10 top-8 transform rotate-45 w-40 text-center ${plan.ribbon.class}`"
+                    >
+                        {{ plan.ribbon.text }}
                     </div>
                 </a-card>
             </div>

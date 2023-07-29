@@ -75,6 +75,7 @@ definePageMeta({
 
             <a-form
                 layout="vertical"
+            autocomplete="off"
                 :model="form"
                 :rules="Rules"
                 @finish="UpdateCard"

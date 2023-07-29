@@ -1,5 +1,4 @@
 import type { AppFunction, App } from '#types/app'
-
 import JSZip from 'jszip'
 
 type Row = {
@@ -13,17 +12,12 @@ export default defineEventHandler(async (event) => {
     const user = await getUser(event)
     if (!user) return BadRequest(event)
 
-    const body = await readBody<{ id: string; name: string }>(event)
+    const id = getRouterParam(event, 'appid')
     const fnname = getRouterParam(event, 'fnname')
 
-    if (!fnname) return BadRequest(event)
-    if (!body.id) return BadRequest(event)
+    if (!fnname || !id) return BadRequest(event)
 
-    const { rows } = await db.execute(GetFunctionQuery, [
-        body.id,
-        user.id,
-        fnname,
-    ])
+    const { rows } = await db.execute(GetFunctionQuery, [id, user.id, fnname])
 
     if (rows.length < 1) return BadRequest(event)
 

@@ -10,16 +10,6 @@ const form = reactive({
     password: '',
 })
 
-function redirect() {
-    let to = '/dashboard'
-
-    if (route.query.redirect) {
-        to = decodeURIComponent(route.query.redirect as string)
-    }
-
-    router.push(to)
-}
-
 async function Login() {
     if (isLoggingIn.value) return
     isLoggingIn.value = true
@@ -35,19 +25,14 @@ async function Login() {
     isLoggingIn.value = false
     if (error.value) return
 
-    redirect()
+    let to = '/dashboard'
+
+    if (route.query.redirect) {
+        to = decodeURIComponent(route.query.redirect as string)
+    }
+
+    router.push(to)
 }
-
-watch(
-    user,
-    (u) => {
-        if (!u) return
-        console.log(u)
-
-        redirect()
-    },
-    { immediate: true }
-)
 
 definePageMeta({
     layout: 'empty',
@@ -87,6 +72,7 @@ definePageMeta({
                 :rules="Rules"
                 :model="form"
                 layout="vertical"
+                autocomplete="off"
                 @finish="Login"
             >
                 <a-form-item label="Username" name="username">

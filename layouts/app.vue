@@ -2,36 +2,28 @@
 import { App, AppFunction } from '#types/app'
 import { NuxtLink } from '#components'
 
-const app = useState<App | null>('useStateApp', () => null)
-const functions = useState<AppFunction[]>('useStateFunctions', () => [])
+const router = useRouter()
 const route = useRoute()
-
-watch(
-    route,
-    async ({ params }) => {
-        if (!params.appid) return
-        if (app.value && app.value.id === params.appid) return
-
-        const [{ data: appdata }, { data: functionsdata }] = await Promise.all([
-            useFetch<App>(() => `/api/apps/${params.appid}`, {
-                method: 'POST',
-            }),
-
-            useFetch<AppFunction[]>(() => `/api/functions`, {
-                method: 'POST',
-                body: {
-                    id: params.id,
-                },
-            }),
-        ])
-
-        if (!appdata.value) return useRouter().push('/dashboard')
-
-        app.value = appdata.value
-        functions.value = functionsdata.value || []
-    },
-    { immediate: true }
+const { data: app } = useFetch<App>(() => `/api/apps/${route.params.appid}`, {
+    method: 'POST',
+    watch: [route],
+})
+const { data: functions } = useFetch<AppFunction[]>(
+    () => `/api/apps/${route.params.appid}/functions`,
+    {
+        method: 'POST',
+        watch: [route],
+    }
 )
+
+useState<App | null>('useStateApp', () => app)
+useState<AppFunction[] | null>('useStateFunctions', () => functions)
+
+watch(app, (a) => {
+    if (a) return
+
+    router.push('/dashboardd')
+})
 </script>
 
 <template>

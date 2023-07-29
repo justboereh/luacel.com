@@ -8,8 +8,24 @@ export const Rules: Record<string, Rule[]> = {
             trigger: 'change',
             async validator(_, v: string) {
                 if (!v) return Promise.reject('Required')
+
+                return Promise.resolve()
+            },
+        },
+        {
+            required: true,
+            trigger: 'change',
+            async validator(_, v: string) {
                 if (!/^[\w\d]+$/g.test(v))
                     return Promise.reject('Invalid username')
+
+                return Promise.resolve()
+            },
+        },
+        {
+            required: true,
+            trigger: 'change',
+            async validator(_, v: string) {
                 if (v.length < 3) return Promise.reject('Min. 3 characters')
 
                 return Promise.resolve()
@@ -22,14 +38,44 @@ export const Rules: Record<string, Rule[]> = {
             trigger: 'change',
             async validator(_, v: string) {
                 if (!v) return Promise.reject('Required')
-                if (/[\s]+/g.test(v)) return Promise.reject('Invalid password')
-                if (/['";]+/g.test(v)) return Promise.reject('Invalid password')
-                if (v.length < 8) return Promise.reject('Min. 8 Characters')
-                if (!v.match(/[\w]+/g))
-                    return Promise.reject('Requires letters')
 
+                return Promise.resolve()
+            },
+        },
+        {
+            required: true,
+            trigger: 'change',
+            async validator(_, v: string) {
+                if (/['";]+/g.test(v)) return Promise.reject('Invalid password')
+
+                return Promise.resolve()
+            },
+        },
+        {
+            required: true,
+            trigger: 'change',
+            async validator(_, v: string) {
+                if (v.length < 8) return Promise.reject('Min. 8 Characters')
+
+                return Promise.resolve()
+            },
+        },
+        {
+            required: true,
+            trigger: 'change',
+            async validator(_, v: string) {
+                if (!v.match(/[\w]+/g))
+                    return Promise.reject('Required at least a letter')
+
+                return Promise.resolve()
+            },
+        },
+        {
+            required: true,
+            trigger: 'change',
+            async validator(_, v: string) {
                 if (!v.match(/[\d]+/g)) {
-                    return Promise.reject('Requires at least a number')
+                    return Promise.reject('Required at least a number')
                 }
 
                 return Promise.resolve()

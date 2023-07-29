@@ -3,7 +3,7 @@ const isDeleting = ref(false)
 const router = useRouter()
 
 async function SignOut() {
-    useCookie('luacel-access').value = ''
+    useCookie('luacel-access').value = null
 
     router.push('/login?redirect=/account')
 }

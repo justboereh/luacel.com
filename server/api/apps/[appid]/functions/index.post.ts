@@ -14,15 +14,10 @@ export default defineEventHandler(async (event) => {
     const user = await getUser(event)
     if (!user) return BadRequest(event)
 
-    const body = await readBody<{ id: string }>(event)
+    const id = getRouterParam(event, 'appid')
+    if (!id) return BadRequest(event)
 
-    if (!body.id) return BadRequest(event)
-
-    const { rows } = await db.execute(GetFunctionQuery, [
-        body.id,
-        user.id,
-        body.id,
-    ])
+    const { rows } = await db.execute(GetFunctionQuery, [id, user.id, id])
 
     return (rows as Rows).map(
         ({ name, domain_custom, domain_set, domain_generated }) => {

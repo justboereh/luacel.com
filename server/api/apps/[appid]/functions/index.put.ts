@@ -4,7 +4,6 @@ import type { App } from '#types/app'
 type Body = {
     code: number[]
     name: string
-    app: string
 }
 
 const GetAppQuery = 'select * from apps where `author` = ? and `id` = ?'
@@ -19,15 +18,16 @@ export default defineEventHandler(async (event) => {
     const user = await getUser(event)
     if (!user) return BadRequest(event)
 
+    const id = getRouterParam(event, 'appid')
     const body = await readBody<Body>(event)
     //prettier-ignore
-    if (!body.name || !body.code || !body.app) return BadRequest(event, 'Invalid data')
+    if (!body.name || !body.code || !id) return BadRequest(event, 'Invalid data')
 
-    const { rows: apps } = await db.execute(GetAppQuery, [user.id, body.app])
+    const { rows: apps } = await db.execute(GetAppQuery, [user.id, id])
     if (apps.length < 1) return BadRequest(event, 'Invalid App')
 
     const { rows: functions } = await db.execute(GetFunctionsQuery, [
-        body.app,
+        id,
         body.name,
     ])
     if (functions.length > 0) return BadRequest(event, 'Name exists')
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
     await db.execute(InsertFunctionQuery, [
         body.name,
         res.FunctionArn,
-        body.app,
+        id,
         fnURL ? fnURL.FunctionUrl : '',
         Math.floor(Date.now() / 1000),
         Math.floor(Date.now() / 1000),
