@@ -2,7 +2,6 @@
 //import { shapes } from '@dicebear/collection'
 
 import type { AppEvent, App, AppFunction } from '#types/app'
-import { serverSupabaseUser } from '#supabase/server'
 
 type Result = {
     id: string
@@ -17,7 +16,7 @@ const GetEventsQuery = 'select text from events where `app` = ? order by date as
 const GetFunctionsQuery = 'select * from functions where `app` = ?'
 
 export default defineEventHandler(async (event) => {
-    const user = await serverSupabaseUser(event)
+    const user = await getUser(event)
     if (!user) return BadRequest(event)
 
     const { rows: apps } = await db.execute(GetAppsQuery, [user.id])

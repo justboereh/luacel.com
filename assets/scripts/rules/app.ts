@@ -31,7 +31,7 @@ export const Regions: RegionItem[] = [
     { title: 'Europe (Stockholm)', value: 'eu-north-1' },
     { title: 'Europe (Zurich)', value: 'eu-central-2' },
     { title: 'Middle East (Bahrain)', value: 'me-south-1' },
-    { title: 'Middle East (UAE)', value: 'me-central-1' },
+    // { title: 'Middle East (UAE)', value: 'me-central-1' },
     { title: 'South America (Sao Paulo)', value: 'sa-east-1' },
 ]
 

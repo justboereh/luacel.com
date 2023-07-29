@@ -1,6 +1,4 @@
 import type { AppFunction, App } from '#types/app'
-import { serverSupabaseUser } from '#supabase/server'
-
 import JSZip from 'jszip'
 
 type Row = {
@@ -11,7 +9,7 @@ type Row = {
 const GetFunctionQuery = 'select functions.arn, apps.region from apps, functions where apps.id = ? and apps.author = ? and functions.name = ?'
 
 export default defineEventHandler(async (event) => {
-    const user = await serverSupabaseUser(event)
+    const user = await getUser(event)
     if (!user) return BadRequest(event)
 
     const body = await readBody<{ id: string; name: string }>(event)

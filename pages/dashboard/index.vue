@@ -107,7 +107,23 @@ useHead({ title: 'Dashboard : Luacel' })
                 </div>
             </div>
 
-            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+                v-if="!apps || apps.length < 1"
+                class="flex flex-col justify-center items-center min-h-md p-8 text-center"
+            >
+                <h2 class="flex items-center gap-2">
+                    <icon
+                        name="fluent:emoji-sad-slight-20-regular"
+                        class="text-4xl"
+                    />
+
+                    Ohhhhh.
+                </h2>
+
+                <p>This looks empty. Let's go and create our first app!</p>
+            </div>
+
+            <div v-else class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <a-card
                     v-for="app of appsToShow"
                     :key="app.name"

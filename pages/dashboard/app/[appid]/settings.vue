@@ -82,7 +82,9 @@ definePageMeta({
                 </a-form-item>
 
                 <a-form-item label="Region" name="region" class="max-w-md">
-                    <a-select :value="settings.region" disabled />
+                    <ClientOnly>
+                        <a-select :value="settings.region" disabled />
+                    </ClientOnly>
                 </a-form-item>
 
                 <a-row class="max-w-md">

@@ -1,6 +1,5 @@
 import JSZip from 'jszip'
 import type { App } from '#types/app'
-import { serverSupabaseUser } from '#supabase/server'
 
 // const res = await CreateFunction({ name, code, region, memory, timeout })
 
@@ -18,7 +17,7 @@ const InsertFunctionQuery = 'insert into functions (`name`, `arn`, `app`, `path`
 const InsertEventQuery = 'insert into events (app, text, date) values (?, ?, ?)'
 
 export default defineEventHandler(async (event) => {
-    const user = await serverSupabaseUser(event)
+    const user = await getUser(event)
     if (!user) return BadRequest(event)
 
     const fnname = getRouterParam(event, 'fnname')

@@ -6,7 +6,6 @@ export const db = connect({
 })
 
 type GetAppsFromDBArgs = {
-    appid: string
     userid: string
 }
 // prettier-ignore
@@ -52,7 +51,7 @@ type GetFunctionsFromDBReturn = ExecutedQuery & {
         name: string
         region: string
         id: string
-    }
+    }[]
 }
 
 // prettier-ignore

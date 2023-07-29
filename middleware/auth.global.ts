@@ -1,11 +1,11 @@
 export default defineNuxtRouteMiddleware(async (to) => {
     const user = useCurrentUser()
+    const access = useCookie('luacel-access')
 
-    console.log(user.value, 'middleware')
+    if (access) await GetUserClient()
 
     const authPaths = ['/login', '/register']
-
-    if (authPaths.includes(to.path) && user.value) {
+    if (authPaths.includes(to.path) && !!user.value) {
         const redirect = to.query.redirect
 
         if (!redirect) return navigateTo('/dashboard')

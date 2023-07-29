@@ -2,7 +2,6 @@ import { rword } from 'rword'
 import { nanoid } from 'nanoid'
 
 import { App } from '#types/app'
-import { serverSupabaseUser } from '#supabase/server'
 
 type Body = {
     name: string
@@ -20,14 +19,12 @@ const GetAppSameDomain = 'select * from apps where `domain_generated` = ? and `d
 const InsertApp = 'insert into apps (`memory`, `timeout`, `name`, `domain_custom`, `domain_generated`, `domain_set`, `region`, `author`, `id`, `created`) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 
 export default defineEventHandler(async (event) => {
-    const user = await serverSupabaseUser(event)
+    const user = await getUser(event)
     if (!user) return BadRequest(event)
 
     const body = await readBody<Body>(event)
     if (!body.name) return BadRequest(event, 'Invalid request')
     if (!body.region) return BadRequest(event, 'Invalid request')
-
-    if (!user.email_confirmed_at) return BadRequest(event, 'Unverified email')
 
     const { rows: apps } = await db.execute(GetAppsQuery, [user.id, body.name])
 

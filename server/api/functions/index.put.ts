@@ -1,6 +1,5 @@
 import { nanoid } from 'nanoid'
 import type { App } from '#types/app'
-import { serverSupabaseUser } from '#supabase/server'
 
 type Body = {
     code: number[]
@@ -17,7 +16,7 @@ const InsertFunctionQuery = 'insert into functions (`name`, `arn`, `app`, `path`
 const InsertEventQuery = 'insert into events (app, text, date) values (?, ?, ?)'
 
 export default defineEventHandler(async (event) => {
-    const user = await serverSupabaseUser(event)
+    const user = await getUser(event)
     if (!user) return BadRequest(event)
 
     const body = await readBody<Body>(event)

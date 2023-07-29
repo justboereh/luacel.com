@@ -2,18 +2,30 @@
 import { useDark, usePrevious } from '@vueuse/core'
 import { Rules } from '#rules/user'
 
-const auth = useSupabaseAuthClient().auth
-const user = useSupabaseUser()
+const user = useCurrentUser()
+const updating = ref(false)
 const form = reactive({
-    name: user.value?.user_metadata.name || '',
+    username: user.value?.username || '',
 })
 
 async function NewName() {
-    auth.updateUser({
-        data: {
-            name: form.name.trim(),
+    if (updating.value) return
+    updating.value = true
+
+    const { error } = await useFetch('/api/account/update', {
+        method: 'POST',
+        body: {
+            username: form.username,
         },
     })
+
+    await GetUserClient()
+
+    updating.value = false
+
+    if (error.value) {
+        console.log(error.value)
+    }
 }
 
 definePageMeta({
@@ -35,11 +47,18 @@ useHead({ title: 'Account : Luacel' })
                 :rules="Rules"
                 @finish="NewName"
             >
-                <a-form-item label="Name" name="name" class="max-w-md">
-                    <a-input v-model:value="form.name" spellcheck="false" />
+                <a-form-item label="Username" name="username" class="max-w-md">
+                    <a-input v-model:value="form.username" spellcheck="false" />
                 </a-form-item>
 
-                <a-button type="primary" html-type="submit"> Save </a-button>
+                <a-button
+                    type="primary"
+                    html-type="submit"
+                    :disabled="updating"
+                    :loading="updating"
+                >
+                    Save
+                </a-button>
             </a-form>
         </div>
     </div>

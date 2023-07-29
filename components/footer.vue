@@ -3,7 +3,7 @@
 
     <footer class="p-4">
         <div class="max-w-5xl mx-auto flex justify-between items-center">
-            <div class="text-xs space-y-2">
+            <div v-if="false" class="text-xs space-y-2">
                 <p class="whitespace-nowrap font-bold">Services used:</p>
 
                 <span class="flex">
@@ -41,6 +41,8 @@
                     </a-button>
                 </span>
             </div>
+
+            <p class="text-sm">© 2023 Luacel Inc. All rights reserved.</p>
 
             <a-button
                 type="link"

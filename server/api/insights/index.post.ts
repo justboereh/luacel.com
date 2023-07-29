@@ -1,12 +1,6 @@
 import type { App } from '#types/app'
 import type { DataResult } from '#types/insights'
-import { serverSupabaseUser } from '#supabase/server'
-import {
-    GetFunctionInvocations,
-    GetFunctionDuration,
-    GetFunctionAverageDuration,
-    QueryMetrics,
-} from '#utils/cloudwatch'
+import { QueryMetrics } from '#utils/cloudwatch'
 
 type Body = {
     id: string
@@ -24,7 +18,7 @@ const GetFunctionQuery = 'select functions.arn, functions.name, apps.region, app
 const GetInvocationsQuery = ``
 
 export default defineEventHandler(async (event) => {
-    const user = await serverSupabaseUser(event)
+    const user = await getUser(event)
     if (!user) return BadRequest(event)
 
     const { id } = await readBody<Body>(event)

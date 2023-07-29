@@ -1,5 +1,4 @@
 import type { App } from '#types/app'
-import { serverSupabaseUser } from '#supabase/server'
 
 // prettier-ignore
 const GetAppQuery = 'select * from apps where `author` = ? and `id` = ?'
@@ -15,7 +14,7 @@ type Body = {
 }
 
 export default defineEventHandler(async (event) => {
-    const user = await serverSupabaseUser(event)
+    const user = await getUser(event)
     if (!user) return BadRequest(event)
 
     const appid = getRouterParam(event, 'appid')

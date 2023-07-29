@@ -1,5 +1,4 @@
 import type { AppFunction, App } from '#types/app'
-import { serverSupabaseUser } from '#supabase/server'
 
 type Rows = Array<{
     name: string
@@ -12,7 +11,7 @@ type Rows = Array<{
 const GetFunctionQuery = 'select functions.name, apps.domain_set, apps.domain_generated, apps.domain_custom, functions.arn, apps.region from apps, functions where apps.id = ? and apps.author = ? and functions.app = ?'
 
 export default defineEventHandler(async (event) => {
-    const user = await serverSupabaseUser(event)
+    const user = await getUser(event)
     if (!user) return BadRequest(event)
 
     const body = await readBody<{ id: string }>(event)

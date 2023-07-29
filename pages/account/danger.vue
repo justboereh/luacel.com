@@ -1,16 +1,19 @@
 <script setup>
-const auth = useSupabaseAuthClient().auth
+const isDeleting = ref(false)
 const router = useRouter()
 
 async function SignOut() {
-    await auth.signOut()
+    useCookie('luacel-access').value = ''
 
     router.push('/login?redirect=/account')
 }
 
 async function DeleteAccount() {
-    const { error } = await useFetch(`/api/delete-account`, {
-        method: 'POST',
+    if (isDeleting.value) return
+    isDeleting.value = true
+
+    const { error } = await useFetch(`/api/account`, {
+        method: 'DELETE',
     })
 
     if (error.value) {
@@ -44,7 +47,7 @@ definePageMeta({
             </p>
 
             <a-space>
-                <a-button danger @click="SignOut">Sign Out</a-button>
+                <a-button danger ghost @click="SignOut">Sign Out</a-button>
 
                 <a-button type="text" danger @click="DeleteAccount">
                     Delete Account

@@ -189,30 +189,32 @@ definePageMeta({
                     </template>
 
                     <template v-if="column.key === 'action'">
-                        <a-dropdown :trigger="['click']">
-                            <icon
-                                name="fluent:more-horizontal-16-regular"
-                                class="text-2xl"
-                            />
+                        <ClientOnly>
+                            <a-dropdown :trigger="['click']">
+                                <icon
+                                    name="fluent:more-horizontal-16-regular"
+                                    class="text-2xl"
+                                />
 
-                            <template #overlay>
-                                <a-menu>
-                                    <a-menu-item>
-                                        <nuxt-link
-                                            :to="`code?fnname=${record.name}`"
+                                <template #overlay>
+                                    <a-menu>
+                                        <a-menu-item>
+                                            <nuxt-link
+                                                :to="`code?fnname=${record.name}`"
+                                            >
+                                                Edit code
+                                            </nuxt-link>
+                                        </a-menu-item>
+                                        <a-menu-item> Rename </a-menu-item>
+                                        <a-menu-item
+                                            @click="DeleteFunction(record.name)"
                                         >
-                                            Edit code
-                                        </nuxt-link>
-                                    </a-menu-item>
-                                    <a-menu-item> Rename </a-menu-item>
-                                    <a-menu-item
-                                        @click="DeleteFunction(record.name)"
-                                    >
-                                        Delete
-                                    </a-menu-item>
-                                </a-menu>
-                            </template>
-                        </a-dropdown>
+                                            Delete
+                                        </a-menu-item>
+                                    </a-menu>
+                                </template>
+                            </a-dropdown>
+                        </ClientOnly>
                     </template>
                 </template>
 
