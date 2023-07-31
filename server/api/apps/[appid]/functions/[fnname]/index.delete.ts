@@ -1,4 +1,8 @@
 import { DeleteFunctionFromDB, GetAppsFromDB } from '#utils/database'
+import {
+    CloudWatchLogsClient,
+    DeleteLogGroupCommand,
+} from '@aws-sdk/client-cloudwatch-logs'
 
 export default defineEventHandler(async (event) => {
     const user = await getUser(event)
@@ -25,6 +29,16 @@ export default defineEventHandler(async (event) => {
         region: apps[0].region,
         name: functions[0].arn,
     })
+
+    const client = new CloudWatchLogsClient({
+        region: apps[0].region,
+    })
+
+    await client.send(
+        new DeleteLogGroupCommand({
+            logGroupName: `/aws/lambda/${functions[0].name}`,
+        })
+    )
 
     return 'Ok'
 })

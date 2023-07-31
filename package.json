@@ -35,6 +35,7 @@
         "jszip": "^3.10.1",
         "nanoid": "^4.0.2",
         "rword": "^3.2.1",
+        "uniqolor": "^1.1.0",
         "vue-chartjs": "^5.2.0"
     }
 }

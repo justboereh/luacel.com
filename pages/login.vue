@@ -72,7 +72,6 @@ definePageMeta({
                 :rules="Rules"
                 :model="form"
                 layout="vertical"
-                autocomplete="off"
                 @finish="Login"
             >
                 <a-form-item label="Username" name="username">

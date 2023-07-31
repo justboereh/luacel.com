@@ -1,9 +1,14 @@
 export type QueryLogsResult = Array<{ field: string; value: string }>
 
+export type QueryMetricsResult = {
+    timestamp: string
+    value: number
+}
+
 export type DataResult = {
     name: string
-    invocations: Record<string, any>
+    invocations: QueryMetricsResult[]
     memory: QueryLogsResult[]
-    duration: Record<string, any>
-    errors: Record<string, any>
+    duration: QueryMetricsResult[]
+    errors: QueryMetricsResult[]
 }

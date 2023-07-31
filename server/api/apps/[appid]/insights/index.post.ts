@@ -24,30 +24,29 @@ export default defineEventHandler(async (event) => {
 
     const result: DataResult[] = []
 
-    for (const app of rows as QueryResponse[]) {
-        const fnname = `${app.appid}--${app.name}`
-
+    for (const func of rows as QueryResponse[]) {
         const responses = await Promise.all([
             QueryMetrics({
-                ...app,
-                query: `SELECT COUNT(Invocations) FROM SCHEMA("AWS/Lambda", FunctionName) WHERE FunctionName = '${fnname}'`,
+                ...func,
+                query: `SELECT COUNT(Invocations) FROM SCHEMA("AWS/Lambda", FunctionName) WHERE FunctionName = '${func.funcid}'`,
             }),
             QueryLogs({
-                ...app,
+                ...func,
                 query: 'filter @type = "REPORT"\n| fields @timestamp as timestamp, @maxMemoryUsed/1000000 as memory',
             }),
             QueryMetrics({
-                ...app,
-                query: `SELECT SUM(Duration) FROM SCHEMA("AWS/Lambda", FunctionName) WHERE FunctionName = '${fnname}'`,
+                ...func,
+                query: `SELECT AVG(Duration) FROM SCHEMA("AWS/Lambda", FunctionName) WHERE FunctionName = '${func.funcid}'`,
             }),
             QueryMetrics({
-                ...app,
-                query: `SELECT COUNT(Errors) FROM SCHEMA("AWS/Lambda", FunctionName) WHERE FunctionName = '${fnname}'`,
+                ...func,
+                query: `SELECT COUNT(Errors) FROM SCHEMA("AWS/Lambda", FunctionName) WHERE FunctionName = '${func.funcid}'`,
             }),
         ])
 
+
         result.push({
-            name: app.name,
+            name: func.name,
             invocations: responses[0],
             memory: responses[1],
             duration: responses[2],

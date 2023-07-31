@@ -9,7 +9,10 @@ import {
     GetQueryResultsCommand,
 } from '@aws-sdk/client-cloudwatch-logs'
 import dayjs from 'dayjs'
-import { QueryLogsResult } from '#types/insights'
+import utc from 'dayjs/plugin/utc'
+import { QueryLogsResult, QueryMetricsResult } from '#types/insights'
+
+dayjs.extend(utc)
 
 export type MetricsArgs = {
     region: string
@@ -110,7 +113,7 @@ export async function QueryMetrics(args: QueryMetricsArgs) {
     })
 
     const response = await client.send(command)
-    const result: Record<string, any> = {}
+    const result: QueryMetricsResult[] = []
 
     if (!response.MetricDataResults) return result
     const DataResult = response.MetricDataResults[0]
@@ -119,10 +122,10 @@ export async function QueryMetrics(args: QueryMetricsArgs) {
     if (!DataResult.Timestamps || !DataResult.Values) return result
 
     for (let index = 0; index < DataResult.Timestamps.length; index++) {
-        const timestamp = DataResult.Timestamps[index].toUTCString()
-        const value = DataResult.Values[index]
-
-        result[timestamp] = value
+        result.push({
+            timestamp: DataResult.Timestamps[index].toUTCString(),
+            value: DataResult.Values[index],
+        })
     }
 
     return result
@@ -139,16 +142,16 @@ export async function QueryLogs(args: QueryLogsArgs) {
         region: args.region,
     })
 
-    const startResponse = await client.send(
-        new StartQueryCommand({
-            logGroupNames: [`/aws/lambda/${args.funcid}`],
-            queryString: args.query,
-            startTime: Math.floor(
-                dayjs().subtract(3, 'hours').valueOf() / 1000
-            ),
-            endTime: Math.floor(Date.now() / 1000),
-        })
-    )
+    const startCommand = {
+        logGroupNames: [`/aws/lambda/${args.funcid}`],
+        queryString: args.query,
+        startTime: Math.floor(
+            dayjs().utc().subtract(3, 'hours').valueOf() / 1000
+        ),
+        endTime: Math.floor(Date.now() / 1000),
+    }
+
+    const startResponse = await client.send(new StartQueryCommand(startCommand))
 
     if (!startResponse.queryId) return []
 
@@ -158,12 +161,7 @@ export async function QueryLogs(args: QueryLogsArgs) {
         })
     )
 
-    console.log({
-        logGroupNames: [`/aws/lambda/${args.funcid}`],
-        queryString: args.query,
-        startTime: Math.floor(dayjs().subtract(3, 'hours').valueOf() / 1000),
-        endTime: Math.floor(Date.now() / 1000),
-    })
+    console.log(getResponse, startCommand)
 
     await client.send(
         new StopQueryCommand({

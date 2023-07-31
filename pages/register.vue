@@ -57,8 +57,6 @@ async function Register() {
 
     Rules.username.pop()
 
-    console.log(Rules.username)
-
     router.push('/login')
 }
 
@@ -100,7 +98,6 @@ definePageMeta({
                 :rules="{ ...Rules }"
                 :model="form"
                 layout="vertical"
-                autocomplete="off"
                 @finish="Register"
             >
                 <a-form-item label="Username" name="username">

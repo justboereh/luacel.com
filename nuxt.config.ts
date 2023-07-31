@@ -13,16 +13,9 @@ export default defineNuxtConfig({
     modules: [
         '@unocss/nuxt',
         'nuxt-icon',
-        'nuxt-monaco-editor',
-        '@nuxt/content',
+        // 'nuxt-monaco-editor',
+        // '@nuxt/content',
         // '@ant-design-vue/nuxt',
-        '@nuxtjs/supabase',
+        // '@nuxtjs/supabase',
     ],
-    supabase: {
-        client: {
-            auth: {
-                detectSessionInUrl: true,
-            },
-        },
-    },
 })

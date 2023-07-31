@@ -26,8 +26,6 @@ export default defineEventHandler(async (event) => {
 
     if (!app) return BadRequest(event)
 
-    console.log(body)
-
     await db.execute(UpdateAppQuery, [
         body.name || app.name,
         !!body.domain_set || app.domain_custom,

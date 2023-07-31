@@ -8,6 +8,7 @@ const app = useState('useStateApp')
 const form = reactive({
     updating: false,
     deleting: false,
+    deleteModalEnabled: false,
 })
 const settings = reactive({
     name: '',
@@ -152,15 +153,39 @@ definePageMeta({
 
             <p>Dangerous actions for the app.</p>
 
-            <a-button
-                danger
-                ghost
-                :disabled="form.deleting"
-                :loading="form.deleting"
-                @click="DeleteApp"
-            >
+            <a-button danger ghost @click="form.deleteModalEnabled = true">
                 Delete app
             </a-button>
         </div>
     </div>
+
+    <a-modal
+        v-model:open="form.deleteModalEnabled"
+        title="Delete App"
+        :centered="true"
+        :destroyOnClose="true"
+        :maskClosable="false"
+        :footer="null"
+    >
+        <p>You are about to delete this app. This action is NOT reversible.</p>
+
+        <a-space>
+            <a-button
+                :disabled="form.deleting"
+                @click="form.deleteModalEnabled = false"
+            >
+                Cancel
+            </a-button>
+
+            <a-button
+                type="text"
+                danger
+                :disabled="form.deleting"
+                :loading="form.deleting"
+                @click="form.deleteModalEnabled = false"
+            >
+                Confirm delete
+            </a-button>
+        </a-space>
+    </a-modal>
 </template>

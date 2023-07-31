@@ -10,15 +10,17 @@ import {
     CategoryScale,
     LinearScale,
     PointElement,
+    TimeScale,
 } from 'chart.js'
 
 import { App } from '#types/app'
 import type { DataResult } from '#types/insights'
+import uniqolor from 'uniqolor'
 import dayjs from 'dayjs'
 import { Card } from 'ant-design-vue'
 
 // prettier-ignore
-ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, LineElement, PointElement)
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, LineElement, PointElement, TimeScale)
 
 type AppRef = globalThis.Ref<App | undefined>
 
@@ -31,14 +33,15 @@ const isGettingMetrics = ref(false)
 const invocationsCount = computed(() => {
     if (!metrics.value) return 0
 
-    return (
-        metrics.value.reduce((a: number, func) => {
-            const values = Object.values(func.invocations)
-            const value = values.reduce((ac, cu) => ac + cu, 0)
+    let result = 0
 
-            return a + (value ? value : 0)
-        }, 0) || 0
-    )
+    for (const { invocations } of metrics.value) {
+        for (const { value } of invocations) {
+            result += value
+        }
+    }
+
+    return result
 })
 
 const invocationsChart = computed(() => {
@@ -46,11 +49,22 @@ const invocationsChart = computed(() => {
 
     if (!metrics.value) return result
 
-    metrics.value.every((func) => {
-        result.datasets.push({
+    result.datasets = metrics.value.map((func) => {
+        const color = uniqolor(func.name, {
+            lightness: [30, 50],
+        }).color
+
+        return {
             label: func.name,
-            data: func.invocations,
-        })
+            borderColor: color,
+            backgroundColor: color,
+            data: func.invocations
+                .map(({ timestamp, value }) => ({
+                    x: dayjs(timestamp).format('h:mm a'),
+                    y: value,
+                }))
+                .reverse(),
+        }
     })
 
     return result
@@ -59,44 +73,81 @@ const invocationsChart = computed(() => {
 const averageDuration = computed(() => {
     if (!metrics.value) return 0
 
-    const v = metrics.value.reduce((a: number, func) => {
-        const values = Object.values(func.duration)
-        const firstvalue = values[0] || 0
-        const value = values.reduce(
-            (ac: number, cu) => (ac + cu) / 2,
-            firstvalue
-        )
+    let result: number | null = null
 
-        return (a + (value ? value : 0)) / 2
-    }, 0)
+    for (const { duration } of metrics.value) {
+        for (const { value } of duration) {
+            if (!result) {
+                result = value
 
-    return v || 0
+                continue
+            }
+
+            result = (result + value) / 2
+        }
+    }
+
+    return Math.floor((result || 0) * 100) / 100
+})
+
+const durationChart = computed(() => {
+    const result = { datasets: [] as any[] }
+
+    if (!metrics.value) return result
+
+    result.datasets = metrics.value.map((func) => {
+        const color = uniqolor(func.name, {
+            lightness: [30, 50],
+        }).color
+
+        return {
+            borderColor: color,
+            backgroundColor: color,
+            label: func.name,
+            data: func.duration
+                .map(({ timestamp, value }) => ({
+                    x: dayjs(timestamp).format('h:mm a'),
+                    y: value,
+                }))
+                .reverse(),
+        }
+    })
+
+    return result
 })
 
 const averageMemory = computed(() => {
     if (!metrics.value) return 0
 
-    const v = metrics.value.reduce((a: number, { memory }) => {
-        const value = memory.reduce(
-            (ac: number, cu) => (ac + Number(cu[1].value)) / 2,
-            0
-        )
+    let result: number | null = null
 
-        return (a + (value ? value : 0)) / 2
-    }, 0)
+    for (const { memory } of metrics.value) {
+        for (const [_, { value }] of memory) {
+            if (!result) {
+                result = Number(value)
 
-    return v || 0
+                continue
+            }
+
+            result = (result + Number(value)) / 2
+        }
+    }
+
+    return Math.floor((result || 0) * 100) / 100
 })
 
 const errorsCount = computed(() => {
     if (!metrics.value) return 0
 
-    return metrics.value.reduce((a: number, func) => {
-        const values = Object.values(func.errors)
-        const value = values.reduce((ac, cu) => ac + cu, 0)
+    let result = 0
 
-        return a + (value ? value : 0)
-    }, 0)
+    for (const { errors } of metrics.value) {
+        for (const { value } of errors) {
+            result += value
+        }
+    }
+
+    return result
 })
 
 async function GetMetrics() {
@@ -127,7 +178,7 @@ definePageMeta({
 <template>
     <div class="p-4 sm:px-8">
         <div class="max-w-5xl mx-auto space-y-4">
-            <a-row justify="end" :gutter="[16]">
+            <a-row justify="end" :gutter="[8]">
                 <a-col>
                     <a-button :disabled="isGettingMetrics" @click="GetMetrics">
                         <template #icon>
@@ -154,32 +205,41 @@ definePageMeta({
                 </a-col>
             </a-row>
 
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
                 <insights-stat name="Invocations" :value="invocationsCount" />
 
-                <insights-stat name="Error">
+                <insights-stat name="Errors">
                     <span class="text-red text-2xl">
                         {{ errorsCount }}
                     </span>
                 </insights-stat>
 
                 <insights-stat
-                    name="Average Duration"
-                    :value="averageDuration + ' sec'"
+                    name="Average Durations"
+                    :value="averageDuration + ' ms'"
                 />
 
                 <insights-stat
-                    name="Average Memory Usage"
+                    name="Average Memory"
                     :value="averageMemory + ' MB'"
                 />
 
-                <insights-stat name="Invocations" class="col-span-2 row-span-2">
+                <insights-stat
+                    name="Invocations"
+                    tooltip="The count of invocations of every minute for the last 3 hours with only the minutes with invocations showing."
+                    class="col-span-2 row-span-2"
+                >
                     <Line
                         :options="{
                             responsive: true,
                             plugins: {
                                 legend: {
                                     display: false,
+                                },
+                            },
+                            scales: {
+                                y: {
+                                    min: 0,
                                 },
                             },
                         }"
@@ -187,7 +247,11 @@ definePageMeta({
                     />
                 </insights-stat>
 
-                <insights-stat name="Duration" class="col-span-2 row-span-2">
+                <insights-stat
+                    name="Average Durations"
+                    tooltip="The sum of durations for every invocation of every minute for the last 3 hours with only the minutes with invocations showing."
+                    class="col-span-2 row-span-2"
+                >
                     <Line
                         :options="{
                             responsive: true,
@@ -196,8 +260,13 @@ definePageMeta({
                                     display: false,
                                 },
                             },
+                            scales: {
+                                y: {
+                                    min: 0,
+                                },
+                            },
                         }"
-                        :data="invocationsChart"
+                        :data="durationChart"
                     />
                 </insights-stat>
             </div>
