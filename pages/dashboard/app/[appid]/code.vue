@@ -131,28 +131,21 @@ definePageMeta({
 
                     <br />
 
-                    <div class="selection">
-                        <span
-                            class="px-4 bg-light-500 grid place-items-center font-semibold"
-                        >
-                            Function
-                        </span>
-
+                    <client-only>
                         <a-select
                             v-model:value="func.selected"
                             :disabled="func.connecting"
                             :loading="func.connecting"
-                            :bordered="false"
-                            class="min-w-20"
-                        >
-                            <a-select-option
-                                v-for="fn of functions || []"
-                                :value="fn.name"
-                            >
-                                {{ fn.name }}
-                            </a-select-option>
-                        </a-select>
-                    </div>
+                            :options="
+                                functions.map(({ name }) => ({
+                                    value: name,
+                                    label: name,
+                                }))
+                            "
+                            class="min-w-40"
+                            placeholder="Function"
+                        />
+                    </client-only>
                 </div>
             </div>
 

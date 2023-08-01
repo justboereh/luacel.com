@@ -12,3 +12,23 @@ export type DataResult = {
     duration: QueryMetricsResult[]
     errors: QueryMetricsResult[]
 }
+
+export type QueryResponse = {
+    name: string
+    queryId: string
+    logName: string
+}
+
+export type ResultsInvocation = {
+    [k: string]: string
+    timestamp: string
+    duration: string
+    memory: string
+}
+
+export type ResultsResponse = {
+    name: string
+    queryId?: string
+    logName?: string
+    invocations?: ResultsInvocation[]
+}

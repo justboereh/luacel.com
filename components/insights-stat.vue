@@ -1,5 +1,10 @@
 <script setup lang="ts">
-const props = defineProps({ value: null, name: String, tooltip: String })
+const props = defineProps({
+    value: null,
+    name: String,
+    tooltip: String,
+    loading: Boolean,
+})
 </script>
 
 <template>
@@ -16,8 +21,17 @@ const props = defineProps({ value: null, name: String, tooltip: String })
             </client-only>
         </p>
 
-        <p v-if="value" class="text-2xl">{{ value }}</p>
+        <div class="relative">
+            <p v-if="value" class="text-2xl">{{ value }}</p>
 
-        <slot />
+            <slot />
+
+            <div
+                v-if="loading"
+                class="grid place-items-center w-full h-full top-0 left-0 absolute bg-white/75"
+            >
+                Loading...
+            </div>
+        </div>
     </a-card>
 </template>
