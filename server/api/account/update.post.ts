@@ -14,11 +14,11 @@ export default defineEventHandler(async (event) => {
     if (!username) return BadRequest(event)
 
     try {
-        const validate = Rules.username[0].validator
+        for (const { validator } of Rules.username) {
+            if (!validator) continue
 
-        if (!validate) return BadRequest(event)
-
-        await validate({}, username, () => {})
+            await validator({}, username, () => {})
+        }
     } catch (error) {
         return BadRequest(event)
     }

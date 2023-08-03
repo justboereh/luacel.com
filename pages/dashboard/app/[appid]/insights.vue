@@ -199,10 +199,7 @@ async function GetResults() {
     for (const body of toGetResults.value) {
         const { data } = await useFetch<ResultsResponse>(
             () => `/api/apps/${route.params.appid}/insights/results`,
-            {
-                method: 'POST',
-                body,
-            }
+            { method: 'POST', body }
         )
 
         if (!data.value || !data.value.invocations) {
@@ -227,9 +224,7 @@ async function QueryLogs() {
 
     const { data } = await useFetch<QueryResponse[]>(
         () => `/api/apps/${route.params.appid}/insights/query`,
-        {
-            method: 'POST',
-        }
+        { method: 'POST' }
     )
 
     if (!data.value) return (hasFailed.value = true)

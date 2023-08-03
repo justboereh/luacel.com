@@ -1,6 +1,7 @@
 import { Rules } from '#rules/user'
 import { getUser } from '#utils/account'
 import { nanoid } from 'nanoid'
+import { sha256 } from 'ohash'
 
 type Body = {
     username: string
@@ -17,14 +18,17 @@ export default defineEventHandler(async (event) => {
     const { username, password } = await readBody<Body>(event)
     if (!username || !password) return BadRequest(event)
 
+
     try {
-        const unValidtor = Rules.username[0].validator
-        const pwValidtor = Rules.password[0].validator
+        const body: Record<string, string> = { username, password }
+        
+        for (const key of ['username', 'password']) {
+            for (const { validator } of Rules[key]) {
+                if (!validator) continue
 
-        if (!unValidtor || !pwValidtor) return BadRequest(event)
-
-        await unValidtor({}, username, () => {})
-        await unValidtor({}, password, () => {})
+                await validator({}, body[key], () => {})
+            }
+        }
     } catch (error) {
         return BadRequest(event)
     }
@@ -32,12 +36,10 @@ export default defineEventHandler(async (event) => {
     const { rows } = await db.execute(UsernameExistsQuery, [username])
     if (rows.length > 0) return BadRequest(event)
 
-    const id = nanoid()
-
     await db.execute(InsertUserQuery, [
-        id,
+        nanoid(),
         username,
-        encodeJWT(password, id),
+        sha256(password),
         new Date().toUTCString(),
     ])
 

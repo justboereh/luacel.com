@@ -12,20 +12,20 @@
         "@nuxt/content": "^2.7.1",
         "@types/jsonwebtoken": "^9.0.2",
         "@types/node": "^18.16.19",
+        "@types/uuid": "^9.0.2",
         "@unocss/nuxt": "^0.53.1",
-        "esbuild": "^0.18.17",
         "monaco-editor": "^0.40.0",
         "nuxt": "^3.6.5",
         "nuxt-icon": "^0.4.2",
         "nuxt-monaco-editor": "^1.2.2"
     },
     "dependencies": {
-        "@aws-sdk/client-cloudwatch-logs": "^3.379.1",
-        "@aws-sdk/client-lambda": "^3.363.0",
-        "@planetscale/database": "^1.8.0",
+        "@aws-sdk/client-cloudwatch-logs": "^3.382.0",
+        "@aws-sdk/client-lambda": "^3.382.0",
+        "@planetscale/database": "^1.10.0",
         "@vueuse/core": "^10.1.2",
         "ant-design-vue": "^4.0.0",
-        "aws-crt": "^1.15.20",
+        "aws-crt": "^1.17.0",
         "chart.js": "^4.3.0",
         "dayjs": "^1.11.9",
         "jsonwebtoken": "^9.0.1",
@@ -33,6 +33,7 @@
         "nanoid": "^4.0.2",
         "rword": "^3.2.1",
         "uniqolor": "^1.1.0",
+        "uuid": "^9.0.0",
         "vue-chartjs": "^5.2.0"
     }
 }

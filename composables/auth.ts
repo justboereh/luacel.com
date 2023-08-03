@@ -11,6 +11,8 @@ export const GetUserClient = async () => {
         method: 'POST',
     })
 
+    console.log(data.value)
+
     if (!data.value) return (user.value = null)
 
     user.value = {

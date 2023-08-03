@@ -85,9 +85,7 @@ watchDebounced(
 
         const { data } = await useFetch<AppFunction[]>(
             () => `/api/apps/${route.params.appid}/functions`,
-            {
-                method: 'POST',
-            }
+            { method: 'POST' }
         )
 
         func.fetching = false

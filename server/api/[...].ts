@@ -1,1 +1,1 @@
-export default defineEventHandler(() => 'hi mom')
+export default defineEventHandler(() => "hi mom");

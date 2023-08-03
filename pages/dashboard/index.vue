@@ -20,9 +20,7 @@ const form = reactive({
     name: '',
     region: Regions[0].value,
 })
-const { data: apps } = useFetch<App[]>('/api/apps', {
-    method: 'POST',
-})
+const { data: apps } = useFetch<App[]>('/api/apps', { method: 'POST' })
 
 const appsToShow = computed(() => {
     if (!apps.value) return []

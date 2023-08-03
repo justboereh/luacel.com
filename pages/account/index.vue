@@ -43,7 +43,7 @@ useHead({ title: 'Account : Luacel' })
 
             <a-form
                 layout="vertical"
-            autocomplete="off"
+                autocomplete="off"
                 :model="form"
                 :rules="Rules"
                 @finish="NewName"

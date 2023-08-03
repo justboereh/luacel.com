@@ -10,10 +10,7 @@ const { data: app } = useFetch<App>(() => `/api/apps/${route.params.appid}`, {
 })
 const { data: functions } = useFetch<AppFunction[]>(
     () => `/api/apps/${route.params.appid}/functions`,
-    {
-        method: 'POST',
-        watch: [route],
-    }
+    { method: 'POST', watch: [route] }
 )
 
 useState<App | null>('useStateApp', () => app)

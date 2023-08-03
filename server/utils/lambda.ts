@@ -10,7 +10,7 @@ import {
     DeleteFunctionCommand,
     ListLayerVersionsCommand,
 } from '@aws-sdk/client-lambda'
-import { LambdaInsightsLayerARN } from 'assets/scripts/misc/lambda'
+import { LambdaInsightsLayerARN } from '#types/../misc/lambda'
 
 export type RegionArnArgs = {
     arn: string
